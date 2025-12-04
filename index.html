@@ -7,30 +7,37 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root{--red-primary:#dc2626;--gold:#fbbf24;--green:#059669}
-        /* Basis-Animationen / Styles (gekürzt, wie vorher) */
+        /* Basis-Animationen / Styles */
         @keyframes shake {0%,100%{transform:rotate(0deg)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
         @keyframes openGift {0%{transform:rotateX(0deg)}100%{transform:rotateX(-120deg)}}
         @keyframes openBowLeft {0%{transform:translate(0,0) rotate(-12deg)}100%{transform:translate(-60px,-20px) rotate(-45deg);opacity:0}}
         @keyframes openBowRight {0%{transform:translate(0,0) rotate(12deg)}100%{transform:translate(60px,-20px) rotate(45deg);opacity:0}}
         @keyframes openBowCenter {0%{transform:translate(-50%,-50%) rotate(45deg) scale(1)}100%{transform:translate(-50%,-50%) rotate(45deg) scale(0);opacity:0}}
-        @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
-        @keyframes sparkle {0%,100%{transform:scale(0) rotate(0);opacity:0}50%{transform:scale(1) rotate(180deg);opacity:1}}
+
+        /* Wichtig: Schneeflocken fallen nur gerade nach unten (keine Kreisbewegung/Rotation) */
+        @keyframes fall {
+            0% { transform: translateY(-10vh); }
+            100% { transform: translateY(110vh); }
+        }
+
+        /* Glitzer */
+        @keyframes sparkle {0%,100%{opacity:0.3}50%{opacity:1}}
+
         body{ background: radial-gradient(ellipse at top,#1e3a8a,#1e1b4b); position:relative; overflow:hidden; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
-        body::before{ content:''; position:absolute; inset:0; background: radial-gradient(2px 2px at 20% 30%, white, transparent), radial-gradient(2px 2px at 60% 70%, white, transparent), radial-gradient(1px 1px at 50% 50%, white, transparent); background-size:200px 200px; animation: sparkle 3s ease-in-out infinite; pointer-events:none; }
+        body::before{ content:''; position:absolute; inset:0; background: radial-gradient(2px 2px at 20% 30%, white, transparent), radial-gradient(2px 2px at 60% 70%, white, transparent), radial-gradient(1px 1px at 50% 50%, white, transparent); background-size:200px 200px; animation: sparkle 4s ease-in-out infinite; pointer-events:none; opacity:0.8 }
+
         .gift-pattern{ background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.08) 10px, rgba(255,255,255,0.08) 20px); }
         .ribbon-shine{ background:linear-gradient(135deg,#fde68a 0%,#fbbf24 50%,#f59e0b 100%); }
         .bow-shine{ background:linear-gradient(135deg,#fde68a 0%,#fbbf24 50%,#f59e0b 100%); }
-        .snowflake{ position:absolute; background:white; border-radius:50%; pointer-events:none; animation: fall linear infinite; }
-        .sparkle{ position:absolute; width:4px; height:4px; background:white; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); animation: sparkle 3s ease-in-out infinite; }
+
+        .snowflake{ position:absolute; background:white; border-radius:50%; pointer-events:none; animation: fall linear forwards; opacity:0.85; }
+
         .glass{ background: rgba(255,255,255,0.08); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.12); }
 
-        /* ==== Konfetti (absolute px-Positionen) ==== */
-        .confetti{ position:fixed; width:8px; height:12px; opacity:0.95; border-radius:2px; pointer-events:none; transform-origin:center; }
-        @keyframes confettiFall {
-            to { transform: translateY(110vh) rotate(720deg) translateX(40px); opacity:0; }
-        }
+        /* Konfetti (Grundstil, Position und Größe werden per JS gesetzt) */
+        .confetti{ position:fixed; pointer-events:none; transform-origin:center; will-change: transform, opacity; }
 
-        /* ==== Musik-Button zentral unten (responsive) ==== */
+        /* Musik-Button zentral unten */
         .music-control{
             position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:120;
             display:flex; align-items:center; gap:10px;
@@ -42,7 +49,6 @@
         .music-state{ color:#e6e6e6; font-size:12px; opacity:0.9; }
         @media (max-width:420px){ .music-title{ display:none; } .music-control{ padding:8px; bottom:12px; } }
 
-        /* Geschenk-öffnen-Klasse */
         .open-lid{ animation: openGift 0.6s ease-out forwards; transform-origin: bottom; }
         .open-bow-left{ animation: openBowLeft 0.5s ease-out forwards; }
         .open-bow-right{ animation: openBowRight 0.5s ease-out forwards; }
@@ -52,7 +58,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center">
 
-    <!-- Lichterkette + Deko -->
+    <!-- Deko -->
     <div class="fixed top-4 left-0 right-0 flex justify-center gap-6 z-0 pointer-events:none">
         <div class="light text-red-500" style="animation-delay:0s;"></div>
         <div class="light text-yellow-400" style="animation-delay:0.3s;"></div>
@@ -105,6 +111,7 @@
             </div>
         </div>
 
+        <!-- Schneefall Container -->
         <div class="fixed inset-0 pointer-events-none" id="snow-container"></div>
     </div>
 
@@ -139,14 +146,13 @@
     const LS_PLAY_KEY = 'xmasMusicPlaying';
     audio.volume = 0.6;
 
-    // === UI Helpers ===
     function updateToggleUI(isPlaying){
         if(isPlaying){ iconPlay.style.display='none'; iconPause.style.display='block'; musicState.textContent='Wiedergabe'; toggleBtn.setAttribute('aria-label','Musik pausieren'); }
         else { iconPlay.style.display='block'; iconPause.style.display='none'; musicState.textContent='Pause'; toggleBtn.setAttribute('aria-label','Musik abspielen'); }
     }
     function showStartHint(){ musicNote.style.display='block'; musicNote.style.opacity='1'; setTimeout(()=>{ musicNote.style.opacity='0'; }, 2200); setTimeout(()=>{ musicNote.style.display='none'; }, 2500); }
 
-    // === Fade helpers ===
+    // Fade helpers
     function fadeAudioTo(targetVolume=0.6,duration=700){
         const start=audio.volume; const diff=targetVolume-start; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0;
         const t=setInterval(()=>{ cur++; audio.volume = Math.min(1, Math.max(0, start + diff*(cur/steps))); if(cur>=steps) clearInterval(t); }, stepTime);
@@ -156,7 +162,7 @@
         const t=setInterval(()=>{ cur++; audio.volume = Math.max(0, start * (1 - cur/steps)); if(cur>=steps){ clearInterval(t); audio.pause(); } }, stepTime);
     }
 
-    // === Play/Pause ===
+    // Play/Pause
     async function toggleMusic(userInitiated=true){
         if(audio.paused){
             try{
@@ -176,7 +182,6 @@
         }
     }
     toggleBtn.addEventListener('click', ()=> toggleMusic(true));
-
     function initMusic(){
         const shouldPlay = localStorage.getItem(LS_PLAY_KEY) === 'true';
         updateToggleUI(shouldPlay);
@@ -185,28 +190,27 @@
         }
     }
 
-    // === Confetti: jetzt aus Geschenk-Position ===
-    function confettiBurstFrom(x, y, count = 36){
-        const colors = ['#f59e0b','#fbbf24','#dc2626','#10b981','#fff1c2'];
-        for(let i=0;i<count;i++){
-            const el = document.createElement('div');
-            el.className = 'confetti';
-            el.style.left = x + (Math.random()*40 - 20) + 'px'; // small spread around origin
-            el.style.top = y + (Math.random()*20 - 10) + 'px';
-            el.style.background = colors[Math.floor(Math.random()*colors.length)];
-            el.style.width = (6 + Math.random()*8) + 'px';
-            el.style.height = (10 + Math.random()*14) + 'px';
-            el.style.opacity = 0.95;
-            el.style.transform = `rotate(${Math.random()*360}deg)`;
-            // random drift via animation-duration and translateX in keyframe
-            el.style.animationName = 'confettiFall';
-            el.style.animationDuration = (1.8 + Math.random()*1.4) + 's';
-            el.style.animationTimingFunction = 'linear';
-            el.style.zIndex = 140;
-            document.body.appendChild(el);
-            setTimeout(()=> el.remove(), 2600 + Math.random()*800);
-        }
+    // === Schneeflocken - gerade nach unten, kein Kreis ===
+    function createSnowflake(){
+        const snowflake = document.createElement('div');
+        snowflake.className = 'snowflake';
+        const left = Math.random() * 100;
+        snowflake.style.left = left + '%';
+        const size = Math.random() * 9 + 3;
+        snowflake.style.width = size + 'px';
+        snowflake.style.height = size + 'px';
+        snowflake.style.opacity = (Math.random() * 0.4 + 0.4).toString();
+        // duration random from 4s to 9s
+        const dur = (4 + Math.random()*5).toFixed(2) + 's';
+        snowflake.style.animationDuration = dur;
+        snowflake.style.animationDelay = '0s';
+        // ensure linear downwards
+        snowflake.style.animationTimingFunction = 'linear';
+        document.getElementById('snow-container').appendChild(snowflake);
+        // remove after duration + small buffer
+        setTimeout(()=> { snowflake.remove(); }, (parseFloat(dur) * 1000) + 500);
     }
+    setInterval(createSnowflake, 200);
 
     // === Schreibmaschinen-Effekt ===
     function typeText(text, container, speed=36, clearBefore=true){
@@ -221,7 +225,75 @@
         });
     }
 
-    // === Geschenk öffnen (einzige Definition) ===
+    // === Konfetti: physikähnliche Bewegung (schießt nach oben, dann fällt) ===
+    // Wir animieren per requestAnimationFrame mit initialer Geschwindigkeit + Gravitation
+    function confettiBurstFrom(originX, originY, count=48){
+        const colors = ['#f59e0b','#fbbf24','#dc2626','#10b981','#fff1c2'];
+        const confettis = [];
+
+        for(let i=0;i<count;i++){
+            const el = document.createElement('div');
+            el.className = 'confetti';
+            // random shape (circle or rectangle)
+            const shape = Math.random() > 0.75 ? 'circle' : 'rect';
+            if(shape==='circle'){
+                el.style.borderRadius = '50%';
+            } else {
+                el.style.borderRadius = (2 + Math.random()*3) + 'px';
+            }
+            el.style.background = colors[Math.floor(Math.random()*colors.length)];
+            const w = (6 + Math.random()*14);
+            const h = (8 + Math.random()*18);
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.left = originX + 'px';
+            el.style.top = originY + 'px';
+            el.style.opacity = '1';
+            el.style.zIndex = 140;
+
+            document.body.appendChild(el);
+
+            // initial velocity (shoot upwards): vy negative
+            const speedX = (Math.random()*600 - 300); // px/s horizontal initial
+            const speedY = -(900 + Math.random()*500); // px/s upwards
+            const rotation = Math.random()*360;
+            const rotSpeed = (Math.random()*900 - 450); // deg/s
+            confettis.push({
+                el, x: originX, y: originY, vx: speedX/1000, vy: speedY/1000, rot: rotation, rotV: rotSpeed/1000, birth: performance.now()
+            });
+        }
+
+        const gravity = 2200 / 1000; // px/ms^2 -> (2.2 px/ms^2) scaled for ms usage
+
+        let last = performance.now();
+        function loop(now){
+            const dt = now - last; // ms
+            last = now;
+            for(let i=confettis.length-1;i>=0;i--){
+                const p = confettis[i];
+                // update velocity (vy affected by gravity)
+                p.vy += gravity * dt;
+                // update position
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.rot += p.rotV * dt;
+                // apply
+                p.el.style.transform = `translate(${p.x - originX}px, ${p.y - originY}px) rotate(${p.rot}deg)`;
+                // fade out when below viewport + buffer
+                if(p.y > window.innerHeight + 100){
+                    // remove from DOM and array
+                    p.el.remove();
+                    confettis.splice(i,1);
+                }
+            }
+            if(confettis.length>0){
+                requestAnimationFrame(loop);
+            }
+        }
+        requestAnimationFrame(loop);
+    }
+
+    // === Geschenk öffnen ===
     let isOpen = false;
     async function openGift(){
         if(isOpen) return;
@@ -235,66 +307,45 @@
         const bowLeft = document.getElementById('bow-left');
         const bowRight = document.getElementById('bow-right');
         const bowCenter = document.getElementById('bow-center');
+        const giftContainer = document.getElementById('gift-container');
 
         // kurz schütteln
-        const giftContainer = document.getElementById('gift-container');
         giftContainer.classList.add('shake');
         setTimeout(()=> giftContainer.classList.remove('shake'), 600);
 
-        // user gesture -> starte Musik falls pausiert
+        // Nutzeraktion: starte Musik falls pausiert
         toggleMusic(true);
 
-        // Schleifen & Knoten aufklappen
+        // Öffnen-Bows
         setTimeout(()=>{
             bowLeft.classList.add('open-bow-left');
             bowRight.classList.add('open-bow-right');
             bowCenter.classList.add('open-bow-center');
         }, 300);
 
-        // Deckel öffnen
+        // Deckel öffnen & konfetti aus der Box schießen (physik)
         setTimeout(()=>{
             lid.classList.add('open-lid');
 
-            // Berechne Konfetti-Startpunkt: Mitte der Box (relativ zum viewport)
+            // berechne Ursprung: etwas innerhalb der Box (relative zur Viewport)
             const rect = box.getBoundingClientRect();
             const originX = Math.round(rect.left + rect.width/2);
-            const originY = Math.round(rect.top + 8); // leicht oberhalb der Box-Mitte, damit es "aus dem Geschenk" kommt
+            const originY = Math.round(rect.top + rect.height*0.15); // etwas über Box-Mitte, damit Konfetti sichtbar aus Innerem schießt
 
-            // Konfetti aus Geschenk
-            confettiBurstFrom(originX, originY, 52);
+            confettiBurstFrom(originX, originY, 64);
 
-            // Nachricht anzeigen, Schreibmaschinen-Effekt
-            setTimeout(()=>{
+            // Nachricht anzeigen
+            setTimeout(()=> {
                 message.classList.remove('hidden');
                 setTimeout(()=> messageBox.classList.add('scale-100'), 30);
-
                 const text = "Frohe Weihnachten! ✨ Möge dein Herz warm und dein Zuhause hell sein.";
-                typeText(text, typed, 36).then(()=> {
-                    // optional: weitere Aktionen nach dem Text
-                });
-            }, 480);
+                typeText(text, typed, 36).then(()=>{ /* optional */ });
+            }, 420);
 
-        }, 700); // öffne nach kurzer Verzögerung, synchron zur Animation
+        }, 700);
     }
 
-    // === Schneeflocken wie zuvor ===
-    function createSnowflake(){
-        const snowflake = document.createElement('div');
-        snowflake.className = 'snowflake';
-        snowflake.style.left = Math.random()*100 + '%';
-        snowflake.style.animationDuration = (Math.random()*3 + 2) + 's';
-        snowflake.style.opacity = Math.random()*0.4 + 0.4;
-        const size = Math.random()*9 + 3;
-        snowflake.style.width = size + 'px';
-        snowflake.style.height = size + 'px';
-        const blur = Math.random()*3;
-        snowflake.style.filter = `blur(${blur}px)`;
-        document.getElementById('snow-container').appendChild(snowflake);
-        setTimeout(()=> snowflake.remove(), 5000);
-    }
-    setInterval(createSnowflake, 150);
-
-    // === Keyboard shortcut Space toggles Musik (außer Inputs) ===
+    // === On load & keyboard ===
     window.addEventListener('keydown', (e)=>{
         if(e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
             e.preventDefault();
@@ -302,10 +353,9 @@
         }
     });
 
-    // === On load ===
     document.addEventListener('DOMContentLoaded', ()=>{
         initMusic();
-        // wenn user irgendwo klickt und localStorage sagt "play", versuche zu starten
+        // wenn zuvor play gesetzt, versuchen beim Klick nochmal
         document.body.addEventListener('click', ()=> {
             const shouldPlay = localStorage.getItem(LS_PLAY_KEY) === 'true';
             if(shouldPlay && audio.paused){
@@ -313,7 +363,6 @@
             }
         });
     });
-
 </script>
 </body>
 </html>
