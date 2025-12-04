@@ -227,72 +227,94 @@
 
     // === Konfetti: physikähnliche Bewegung (schießt nach oben, dann fällt) ===
     // Wir animieren per requestAnimationFrame mit initialer Geschwindigkeit + Gravitation
-    function confettiBurstFrom(originX, originY, count=48){
-        const colors = ['#f59e0b','#fbbf24','#dc2626','#10b981','#fff1c2'];
-        const confettis = [];
+    // === Robuste confettiBurstFrom (ersetze die alte Version) ===
+function confettiBurstFrom(originX, originY, count = 48) {
+    const colors = ['#f59e0b','#fbbf24','#dc2626','#10b981','#fff1c2'];
+    const confettis = [];
 
-        for(let i=0;i<count;i++){
-            const el = document.createElement('div');
-            el.className = 'confetti';
-            // random shape (circle or rectangle)
-            const shape = Math.random() > 0.75 ? 'circle' : 'rect';
-            if(shape==='circle'){
-                el.style.borderRadius = '50%';
-            } else {
-                el.style.borderRadius = (2 + Math.random()*3) + 'px';
-            }
-            el.style.background = colors[Math.floor(Math.random()*colors.length)];
-            const w = (6 + Math.random()*14);
-            const h = (8 + Math.random()*18);
-            el.style.width = w + 'px';
-            el.style.height = h + 'px';
-            el.style.left = originX + 'px';
-            el.style.top = originY + 'px';
-            el.style.opacity = '1';
-            el.style.zIndex = 140;
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'confetti';
+        // gelegentlich runde Form
+        if (Math.random() > 0.78) el.style.borderRadius = '50%';
+        else el.style.borderRadius = (2 + Math.random()*3) + 'px';
 
-            document.body.appendChild(el);
+        const w = (6 + Math.random() * 12);
+        const h = (8 + Math.random() * 16);
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.left = originX + 'px';
+        el.style.top  = originY + 'px';
+        el.style.position = 'fixed';
+        el.style.zIndex = 9999;
+        el.style.opacity = '1';
+        el.style.willChange = 'transform, opacity';
+        document.body.appendChild(el);
 
-            // initial velocity (shoot upwards): vy negative
-            const speedX = (Math.random()*600 - 300); // px/s horizontal initial
-            const speedY = -(900 + Math.random()*500); // px/s upwards
-            const rotation = Math.random()*360;
-            const rotSpeed = (Math.random()*900 - 450); // deg/s
-            confettis.push({
-                el, x: originX, y: originY, vx: speedX/1000, vy: speedY/1000, rot: rotation, rotV: rotSpeed/1000, birth: performance.now()
-            });
-        }
+        // initiale Geschwindigkeit in px/s (shoot up)
+        const angle = (-80 + Math.random() * 160) * (Math.PI / 180); // streuung
+        const speed = 600 + Math.random() * 500; // px/s
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed; // negative -> upwards
 
-        const gravity = 2200 / 1000; // px/ms^2 -> (2.2 px/ms^2) scaled for ms usage
+        const rot = Math.random() * 360;
+        const rotV = (Math.random() * 600 - 300); // deg/s
 
-        let last = performance.now();
-        function loop(now){
-            const dt = now - last; // ms
-            last = now;
-            for(let i=confettis.length-1;i>=0;i--){
-                const p = confettis[i];
-                // update velocity (vy affected by gravity)
-                p.vy += gravity * dt;
-                // update position
-                p.x += p.vx * dt;
-                p.y += p.vy * dt;
-                p.rot += p.rotV * dt;
-                // apply
-                p.el.style.transform = `translate(${p.x - originX}px, ${p.y - originY}px) rotate(${p.rot}deg)`;
-                // fade out when below viewport + buffer
-                if(p.y > window.innerHeight + 100){
-                    // remove from DOM and array
-                    p.el.remove();
-                    confettis.splice(i,1);
-                }
-            }
-            if(confettis.length>0){
-                requestAnimationFrame(loop);
-            }
-        }
-        requestAnimationFrame(loop);
+        confettis.push({
+            el,
+            x: originX,
+            y: originY,
+            vx, vy,
+            rot, rotV,
+            birth: performance.now(),
+            life: 0
+        });
     }
 
+    const gravity = 1200; // px/s^2 (fühlt natürlich)
+    let last = performance.now();
+
+    function frame(now) {
+        const dtMs = now - last;
+        last = now;
+        const dt = dtMs / 1000; // seconds
+
+        for (let i = confettis.length - 1; i >= 0; i--) {
+            const p = confettis[i];
+            // physics
+            p.vy += gravity * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.rot += p.rotV * dt;
+            p.life += dt;
+
+            // apply transform relative to origin
+            const tx = p.x - (p.el._originX ?? p.x);
+            const ty = p.y - (p.el._originY ?? p.y);
+            p.el.style.transform = `translate(${p.x - p.el.getBoundingClientRect().left}px, ${p.y - p.el.getBoundingClientRect().top}px) rotate(${p.rot}deg)`;
+
+            // Simpler: set transform using translate with absolute positioning anchor at origin:
+            p.el.style.transform = `translate(${p.x - originX}px, ${p.y - originY}px) rotate(${p.rot}deg)`;
+
+            // Fade out slowly after some life
+            if (p.life > 2.4) {
+                const fade = Math.max(0, 1 - (p.life - 2.4) / 1.4);
+                p.el.style.opacity = String(fade);
+            }
+
+            // Clean up when weit unterhalb des Bildschirms oder zu alt
+            if (p.y > window.innerHeight + 200 || p.life > 6) {
+                p.el.remove();
+                confettis.splice(i, 1);
+            }
+        }
+
+        if (confettis.length > 0) requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+}
     // === Geschenk öffnen ===
     let isOpen = false;
     async function openGift(){
