@@ -3,24 +3,17 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Weihnachtsgeschenk</title>
+    <title>Weihnachtsgeschenk — QR verbessert</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         :root{--red-primary:#dc2626;--gold:#fbbf24;--green:#059669}
-        /* Basis-Animationen / Styles */
         @keyframes shake {0%,100%{transform:rotate(0deg)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
         @keyframes openGift {0%{transform:rotateX(0deg)}100%{transform:rotateX(-120deg)}}
         @keyframes openBowLeft {0%{transform:translate(0,0) rotate(-12deg)}100%{transform:translate(-60px,-20px) rotate(-45deg);opacity:0}}
         @keyframes openBowRight {0%{transform:translate(0,0) rotate(12deg)}100%{transform:translate(60px,-20px) rotate(45deg);opacity:0}}
         @keyframes openBowCenter {0%{transform:translate(-50%,-50%) rotate(45deg) scale(1)}100%{transform:translate(-50%,-50%) rotate(45deg) scale(0);opacity:0}}
-
-        /* Wichtig: Schneeflocken fallen nur gerade nach unten (keine Kreisbewegung/Rotation) */
-        @keyframes fall {
-            0% { transform: translateY(-10vh); }
-            100% { transform: translateY(110vh); }
-        }
-
-        /* Glitzer */
+        @keyframes fall {0% { transform: translateY(-10vh);}100%{ transform: translateY(110vh);}}
         @keyframes sparkle {0%,100%{opacity:0.3}50%{opacity:1}}
 
         body{ background: radial-gradient(ellipse at top,#1e3a8a,#1e1b4b); position:relative; overflow:hidden; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
@@ -32,18 +25,11 @@
 
         .snowflake{ position:absolute; background:white; border-radius:50%; pointer-events:none; animation: fall linear forwards; opacity:0.85; }
 
-        .glass{ background: rgba(255,255,255,0.08); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.12); }
+        .glass{ background: rgba(255,255,255,0.06); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.08); }
 
-        /* Konfetti (Grundstil, Position und Größe werden per JS gesetzt) */
         .confetti{ position:fixed; pointer-events:none; transform-origin:center; will-change: transform, opacity; }
 
-        /* Musik-Button zentral unten */
-        .music-control{
-            position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:120;
-            display:flex; align-items:center; gap:10px;
-            background: rgba(0,0,0,0.45); padding:10px 14px; border-radius:999px;
-            backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 30px rgba(0,0,0,0.45);
-        }
+        .music-control{ position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:120; display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.45); padding:10px 14px; border-radius:999px; backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 30px rgba(0,0,0,0.45); }
         .music-btn{ width:48px; height:48px; display:grid; place-items:center; border-radius:999px; background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); cursor:pointer; border:1px solid rgba(255,255,255,0.06);}
         .music-title{ color:#fff; font-weight:600; font-size:13px; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis;}
         .music-state{ color:#e6e6e6; font-size:12px; opacity:0.9; }
@@ -54,24 +40,24 @@
         .open-bow-right{ animation: openBowRight 0.5s ease-out forwards; }
         .open-bow-center{ animation: openBowCenter 0.5s ease-out forwards; }
 
+        /* QR Modal & Video overlay styling */
+        #qr-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:80; background:linear-gradient(180deg, rgba(3,7,18,0.6), rgba(3,7,18,0.85)); }
+        .qr-card { width: min(720px, 92vw); max-width:720px; aspect-ratio: 16/10; position:relative; border-radius:18px; overflow:hidden; box-shadow: 0 30px 80px rgba(2,6,23,0.75); border:1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:flex; align-items:center; justify-content:center; }
+        #qr-video { width:100%; height:100%; object-fit:cover; display:block; }
+        #qr-overlay { position:absolute; inset:0; pointer-events:none; }
+        .qr-hint { position:absolute; left:12px; top:12px; font-weight:700; color:var(--gold); background:rgba(0,0,0,0.45); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.04); }
+        .qr-close { position:absolute; right:12px; top:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:8px; border-radius:10px; cursor:pointer; color:#fff; }
+        .qr-anchored-overlay { position:fixed; transform:translate(-50%,-120%); z-index:90; pointer-events:auto; background:linear-gradient(180deg, rgba(0,0,0,0.8), rgba(10,10,10,0.6)); color:var(--gold); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); font-weight:700; box-shadow:0 10px 30px rgba(0,0,0,0.6); }
+
+        .pulse { animation: pulse 1s ease-out 0s 2; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251,191,36,0.8); } 100% { box-shadow: 0 0 0 18px rgba(251,191,36,0); } }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
 
-    <!-- Deko -->
-    <div class="fixed top-4 left-0 right-0 flex justify-center gap-6 z-0 pointer-events:none">
-        <div class="light text-red-500" style="animation-delay:0s;"></div>
-        <div class="light text-yellow-400" style="animation-delay:0.3s;"></div>
-        <div class="light text-green-500" style="animation-delay:0.6s;"></div>
-    </div>
-
-    <div class="fixed left-4 bottom-8 opacity-20"><div class="tree relative"><div class="tree-trunk"></div></div></div>
-    <div class="fixed right-4 bottom-8 opacity-20"><div class="tree relative"><div class="tree-trunk"></div></div></div>
-
-    <!-- Hauptbereich mit Geschenk -->
+    <!-- Geschenk -->
     <div class="text-center relative z-10 px-4">
         <div id="gift-container" class="relative cursor-pointer perspective-1000" onclick="openGift()">
-            <!-- Deckel -->
             <div id="gift-lid" class="relative z-10 mb-1 sm:mb-2">
                 <div class="w-40 h-14 sm:w-56 sm:h-20 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-t-lg mx-auto shadow-2xl gift-pattern border-2 sm:border-4 border-red-800 relative overflow-visible">
                     <div class="absolute top-1 left-2 w-14 h-6 sm:top-2 sm:left-4 sm:w-20 sm:h-8 bg-white opacity-20 rounded-full blur-sm"></div>
@@ -92,8 +78,7 @@
                 </div>
             </div>
 
-            <!-- Box -->
-            <div id="gift-box" class="w-40 h-40 sm:w-56 sm:h-56 bg-gradient-to-br from-red-500 via-red-600 to-red-800 mx-auto shadow-2xl rounded-b-lg relative gift-pattern border-2 sm:border-4 border-red-800">
+            <div id="gift-box" class="w-40 h-40 sm:w-56 sm:h-56 bg-gradient-to-br from-red-500 via-red-600 to-red-800 mx-auto shadow-2xl rounded-b-lg relative gift-pattern border-2 sm:border-4 border-red-800 z-20">
                 <div class="absolute top-2 left-3 w-16 h-20 sm:top-4 sm:left-6 sm:w-24 sm:h-32 bg-white opacity-20 rounded-full blur-md"></div>
                 <div class="absolute top-0 bottom-0 left-1/2 w-5 sm:w-8 ribbon-shine transform -translate-x-1/2 shadow-lg border-l border-r sm:border-l-2 sm:border-r-2 border-yellow-600"></div>
                 <div class="absolute top-0 bottom-0 left-1/2 w-0.5 sm:w-1 bg-yellow-300 transform -translate-x-1/2"></div>
@@ -104,24 +89,21 @@
             </div>
         </div>
 
-        <!-- Nachricht-Modal -->
         <div id="message" class="hidden fixed inset-0 flex items-center justify-center z-50 px-4">
             <div class="glass rounded-2xl p-4 sm:p-8 shadow-2xl transform scale-0 transition-transform duration-500 border-2 border-white/30 max-w-sm" id="message-box">
                 <div id="typed-text" class="text-white font-bold text-lg sm:text-2xl drop-shadow-lg text-center"></div>
             </div>
         </div>
 
-        <!-- Schneefall Container -->
         <div class="fixed inset-0 pointer-events-none" id="snow-container"></div>
     </div>
 
-    <!-- Audio (ersetze src) -->
+    <!-- Audio -->
     <audio id="bg-music" loop preload="auto">
         <source src="dein_lied.mp3" type="audio/mpeg">
         Dein Browser unterstützt kein Audio-Tag.
     </audio>
 
-    <!-- Musik-Kontrolle (zentral unten) -->
     <div class="music-control" id="music-control" role="region" aria-label="Musik Steuerung">
         <button class="music-btn" id="music-toggle" title="Musik abspielen / pausieren" aria-label="Musik abspielen">
             <svg id="icon-play" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -135,8 +117,29 @@
 
     <div id="music-note" style="position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:rgba(0,0,0,0.6);color:#fff;padding:8px 12px;border-radius:10px;font-size:13px;display:none;z-index:130;">Zum Starten antippen</div>
 
+    <!-- QR Modal -->
+    <div id="qr-modal" aria-hidden="true">
+        <div class="qr-card glass">
+            <div class="qr-hint">Suche QR-Code</div>
+            <button class="qr-close" id="qr-close" title="Scanner schließen">✕</button>
+            <video id="qr-video" autoplay playsinline muted></video>
+            <canvas id="qr-overlay"></canvas>
+        </div>
+    </div>
+
+    <!-- hidden scan canvas (smaller, used for jsQR) -->
+    <canvas id="scan-canvas" style="display:none"></canvas>
+
+    <!-- jsQR CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
 <script>
-    // === Elemente & Konstanten ===
+    // === Konfiguration ===
+    const expectedValue = "https://liste78okarina.github.io"; // anpassen
+    const SCAN_WIDTH = 640;        // width of scan-canvas (downsample). Lower => faster but less detail.
+    const SCAN_INTERVAL = 80;      // min ms between scans (~12.5 FPS). Tune for performance.
+
+    // === Elemente ===
     const audio = document.getElementById('bg-music');
     const toggleBtn = document.getElementById('music-toggle');
     const iconPlay = document.getElementById('icon-play');
@@ -146,51 +149,34 @@
     const LS_PLAY_KEY = 'xmasMusicPlaying';
     audio.volume = 0.6;
 
+    const qrModal = document.getElementById('qr-modal');
+    const qrVideo = document.getElementById('qr-video');
+    const qrOverlay = document.getElementById('qr-overlay');
+    const qrClose = document.getElementById('qr-close');
+
+    const scanCanvas = document.getElementById('scan-canvas');
+    const scanCtx = scanCanvas.getContext('2d');
+    const overlayCtx = qrOverlay.getContext('2d');
+
+    // State
+    let qrStream = null;
+    let scanning = false;
+    let matched = false;
+    let lastScan = 0;
+
+    // --- Musik helpers (unchanged) ---
     function updateToggleUI(isPlaying){
         if(isPlaying){ iconPlay.style.display='none'; iconPause.style.display='block'; musicState.textContent='Wiedergabe'; toggleBtn.setAttribute('aria-label','Musik pausieren'); }
         else { iconPlay.style.display='block'; iconPause.style.display='none'; musicState.textContent='Pause'; toggleBtn.setAttribute('aria-label','Musik abspielen'); }
     }
     function showStartHint(){ musicNote.style.display='block'; musicNote.style.opacity='1'; setTimeout(()=>{ musicNote.style.opacity='0'; }, 2200); setTimeout(()=>{ musicNote.style.display='none'; }, 2500); }
-
-    // Fade helpers
-    function fadeAudioTo(targetVolume=0.6,duration=700){
-        const start=audio.volume; const diff=targetVolume-start; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0;
-        const t=setInterval(()=>{ cur++; audio.volume = Math.min(1, Math.max(0, start + diff*(cur/steps))); if(cur>=steps) clearInterval(t); }, stepTime);
-    }
-    function fadeOutAndPause(duration=400){
-        const start=audio.volume; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0;
-        const t=setInterval(()=>{ cur++; audio.volume = Math.max(0, start * (1 - cur/steps)); if(cur>=steps){ clearInterval(t); audio.pause(); } }, stepTime);
-    }
-
-    // Play/Pause
-    async function toggleMusic(userInitiated=true){
-        if(audio.paused){
-            try{
-                await audio.play();
-                if(userInitiated) fadeAudioTo(0.6,700);
-                localStorage.setItem(LS_PLAY_KEY,'true');
-                updateToggleUI(true);
-            }catch(err){
-                showStartHint();
-                updateToggleUI(false);
-                console.warn('Play blockiert:',err);
-            }
-        } else {
-            fadeOutAndPause(400);
-            localStorage.setItem(LS_PLAY_KEY,'false');
-            updateToggleUI(false);
-        }
-    }
+    function fadeAudioTo(targetVolume=0.6,duration=700){ const start=audio.volume; const diff=targetVolume-start; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0; const t=setInterval(()=>{ cur++; audio.volume = Math.min(1, Math.max(0, start + diff*(cur/steps))); if(cur>=steps) clearInterval(t); }, stepTime); }
+    function fadeOutAndPause(duration=400){ const start=audio.volume; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0; const t=setInterval(()=>{ cur++; audio.volume = Math.max(0, start * (1 - cur/steps)); if(cur>=steps){ clearInterval(t); audio.pause(); } }, stepTime); }
+    async function toggleMusic(userInitiated=true){ if(audio.paused){ try{ await audio.play(); if(userInitiated) fadeAudioTo(0.6,700); localStorage.setItem(LS_PLAY_KEY,'true'); updateToggleUI(true); }catch(err){ showStartHint(); updateToggleUI(false); console.warn('Play blockiert:',err); } } else { fadeOutAndPause(400); localStorage.setItem(LS_PLAY_KEY,'false'); updateToggleUI(false); } }
     toggleBtn.addEventListener('click', ()=> toggleMusic(true));
-    function initMusic(){
-        const shouldPlay = localStorage.getItem(LS_PLAY_KEY) === 'true';
-        updateToggleUI(shouldPlay);
-        if(shouldPlay){
-            audio.play().then(()=> updateToggleUI(true)).catch(()=> { updateToggleUI(false); showStartHint(); });
-        }
-    }
+    function initMusic(){ const shouldPlay = localStorage.getItem(LS_PLAY_KEY) === 'true'; updateToggleUI(shouldPlay); if(shouldPlay){ audio.play().then(()=> updateToggleUI(true)).catch(()=> { updateToggleUI(false); showStartHint(); }); } }
 
-    // === Schneeflocken - gerade nach unten, kein Kreis ===
+    // === Schneeflocken (unchanged) ===
     function createSnowflake(){
         const snowflake = document.createElement('div');
         snowflake.className = 'snowflake';
@@ -200,171 +186,291 @@
         snowflake.style.width = size + 'px';
         snowflake.style.height = size + 'px';
         snowflake.style.opacity = (Math.random() * 0.4 + 0.4).toString();
-        // duration random from 4s to 9s
         const dur = (4 + Math.random()*5).toFixed(2) + 's';
         snowflake.style.animationDuration = dur;
         snowflake.style.animationDelay = '0s';
-        // ensure linear downwards
         snowflake.style.animationTimingFunction = 'linear';
         document.getElementById('snow-container').appendChild(snowflake);
-        // remove after duration + small buffer
         setTimeout(()=> { snowflake.remove(); }, (parseFloat(dur) * 1000) + 500);
     }
     setInterval(createSnowflake, 200);
 
-    // === Schreibmaschinen-Effekt ===
-    function typeText(text, container, speed=36, clearBefore=true){
-        return new Promise((resolve)=>{
-            if(clearBefore) container.textContent='';
-            let i=0;
-            const t = setInterval(()=>{
-                container.textContent += text.charAt(i);
-                i++;
-                if(i>=text.length){ clearInterval(t); resolve(); }
-            }, speed);
-        });
-    }
-
-    // === Konfetti: physikähnliche Bewegung (schießt nach oben, dann fällt) ===
-    // Wir animieren per requestAnimationFrame mit initialer Geschwindigkeit + Gravitation
-    // === Robuste confettiBurstFrom (ersetze die alte Version) ===
-function confettiBurstFrom(originX, originY, count = 48) {
-    const colors = ['#f59e0b','#fbbf24','#dc2626','#10b981','#fff1c2'];
-    const confettis = [];
-
-    for (let i = 0; i < count; i++) {
-        const el = document.createElement('div');
-        el.className = 'confetti';
-        // gelegentlich runde Form
-        if (Math.random() > 0.78) el.style.borderRadius = '50%';
-        else el.style.borderRadius = (2 + Math.random()*3) + 'px';
-
-        const w = (6 + Math.random() * 12);
-        const h = (8 + Math.random() * 16);
-        el.style.width = w + 'px';
-        el.style.height = h + 'px';
-        el.style.background = colors[Math.floor(Math.random() * colors.length)];
-        el.style.left = originX + 'px';
-        el.style.top  = originY + 'px';
-        el.style.position = 'fixed';
-        el.style.zIndex = 9999;
-        el.style.opacity = '1';
-        el.style.willChange = 'transform, opacity';
-        document.body.appendChild(el);
-
-        // initiale Geschwindigkeit in px/s (shoot up)
-        const angle = (-80 + Math.random() * 160) * (Math.PI / 180); // streuung
-        const speed = 600 + Math.random() * 500; // px/s
-        const vx = Math.cos(angle) * speed;
-        const vy = Math.sin(angle) * speed; // negative -> upwards
-
-        const rot = Math.random() * 360;
-        const rotV = (Math.random() * 600 - 300); // deg/s
-
-        confettis.push({
-            el,
-            x: originX,
-            y: originY,
-            vx, vy,
-            rot, rotV,
-            birth: performance.now(),
-            life: 0
-        });
-    }
-
-    const gravity = 1200; // px/s^2 (fühlt natürlich)
-    let last = performance.now();
-
-    function frame(now) {
-        const dtMs = now - last;
-        last = now;
-        const dt = dtMs / 1000; // seconds
-
-        for (let i = confettis.length - 1; i >= 0; i--) {
-            const p = confettis[i];
-            // physics
-            p.vy += gravity * dt;
-            p.x += p.vx * dt;
-            p.y += p.vy * dt;
-            p.rot += p.rotV * dt;
-            p.life += dt;
-
-            // apply transform relative to origin
-            const tx = p.x - (p.el._originX ?? p.x);
-            const ty = p.y - (p.el._originY ?? p.y);
-            p.el.style.transform = `translate(${p.x - p.el.getBoundingClientRect().left}px, ${p.y - p.el.getBoundingClientRect().top}px) rotate(${p.rot}deg)`;
-
-            // Simpler: set transform using translate with absolute positioning anchor at origin:
-            p.el.style.transform = `translate(${p.x - originX}px, ${p.y - originY}px) rotate(${p.rot}deg)`;
-
-            // Fade out slowly after some life
-            if (p.life > 2.4) {
-                const fade = Math.max(0, 1 - (p.life - 2.4) / 1.4);
-                p.el.style.opacity = String(fade);
-            }
-
-            // Clean up when weit unterhalb des Bildschirms oder zu alt
-            if (p.y > window.innerHeight + 200 || p.life > 6) {
-                p.el.remove();
-                confettis.splice(i, 1);
-            }
+    // === Konfetti (unchanged) ===
+    function confettiBurstFrom(originX, originY, count = 48) {
+        const colors = ['#f59e0b','#fbbf24','#dc2626','#10b981','#fff1c2'];
+        const confettis = [];
+        for (let i = 0; i < count; i++) {
+            const el = document.createElement('div');
+            el.className = 'confetti';
+            if (Math.random() > 0.78) el.style.borderRadius = '50%';
+            else el.style.borderRadius = (2 + Math.random()*3) + 'px';
+            const w = (6 + Math.random() * 12);
+            const h = (8 + Math.random() * 16);
+            el.style.width = w + 'px';
+            el.style.height = h + 'px';
+            el.style.background = colors[Math.floor(Math.random() * colors.length)];
+            el.style.left = originX + 'px';
+            el.style.top  = originY + 'px';
+            el.style.position = 'fixed';
+            el.style.zIndex = 40;
+            el.style.opacity = '1';
+            el.style.willChange = 'transform, opacity';
+            document.body.appendChild(el);
+            const angle = (-130 + Math.random() * 70) * (Math.PI / 180);
+            const speed = 600 + Math.random() * 450;
+            const vx = Math.cos(angle) * speed;
+            const vy = Math.sin(angle) * speed;
+            const rot = Math.random() * 360;
+            const rotV = (Math.random() * 600 - 300);
+            confettis.push({ el, x: originX, y: originY, vx, vy, rot, rotV, birth: performance.now(), life: 0 });
         }
-
-        if (confettis.length > 0) requestAnimationFrame(frame);
+        const gravity = 1200;
+        let last = performance.now();
+        function frame(now) {
+            const dtMs = now - last; last = now;
+            const dt = dtMs / 1000;
+            for (let i = confettis.length - 1; i >= 0; i--) {
+                const p = confettis[i];
+                p.vy += gravity * dt;
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.rot += p.rotV * dt;
+                p.life += dt;
+                p.el.style.transform = `translate(${p.x - originX}px, ${p.y - originY}px) rotate(${p.rot}deg)`;
+                if (p.life > 2.4) {
+                    const fade = Math.max(0, 1 - (p.life - 2.4) / 1.4);
+                    p.el.style.opacity = String(fade);
+                }
+                if (p.y > window.innerHeight + 200 || p.life > 6) { p.el.remove(); confettis.splice(i, 1); }
+            }
+            if (confettis.length > 0) requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
     }
 
-    requestAnimationFrame(frame);
-}
     // === Geschenk öffnen ===
     let isOpen = false;
     async function openGift(){
         if(isOpen) return;
         isOpen = true;
-
         const lid = document.getElementById('gift-lid');
         const box = document.getElementById('gift-box');
-        const message = document.getElementById('message');
-        const messageBox = document.getElementById('message-box');
-        const typed = document.getElementById('typed-text');
         const bowLeft = document.getElementById('bow-left');
         const bowRight = document.getElementById('bow-right');
         const bowCenter = document.getElementById('bow-center');
         const giftContainer = document.getElementById('gift-container');
 
-        // kurz schütteln
+        toggleMusic(true);
         giftContainer.classList.add('shake');
         setTimeout(()=> giftContainer.classList.remove('shake'), 600);
+        setTimeout(()=>{ bowLeft.classList.add('open-bow-left'); bowRight.classList.add('open-bow-right'); bowCenter.classList.add('open-bow-center'); }, 300);
 
-        // Nutzeraktion: starte Musik falls pausiert
-        toggleMusic(true);
-
-        // Öffnen-Bows
-        setTimeout(()=>{
-            bowLeft.classList.add('open-bow-left');
-            bowRight.classList.add('open-bow-right');
-            bowCenter.classList.add('open-bow-center');
-        }, 300);
-
-        // Deckel öffnen & konfetti aus der Box schießen (physik)
         setTimeout(()=>{
             lid.classList.add('open-lid');
-
-            // berechne Ursprung: etwas innerhalb der Box (relative zur Viewport)
-            const rect = box.getBoundingClientRect();
-            const originX = Math.round(rect.left + rect.width/2);
-            const originY = Math.round(rect.top + rect.height*0.15); // etwas über Box-Mitte, damit Konfetti sichtbar aus Innerem schießt
-
-            confettiBurstFrom(originX, originY, 64);
-
-            // Nachricht anzeigen
             setTimeout(()=> {
-                message.classList.remove('hidden');
-                setTimeout(()=> messageBox.classList.add('scale-100'), 30);
-                const text = "Frohe Weihnachten! ✨ Möge dein Herz warm und dein Zuhause hell sein.";
-                typeText(text, typed, 36).then(()=>{ /* optional */ });
-            }, 420);
+                const rect = box.getBoundingClientRect();
+                const originX = Math.round(rect.left + rect.width/2);
+                const originY = Math.round(rect.top + rect.height*0.08);
+                confettiBurstFrom(originX, originY, 64);
+            },600);
 
+            setTimeout(()=> startQRFlow(), 900);
         }, 700);
+    }
+
+    // === QR Flow (verbessert) ===
+    async function startQRFlow(){
+        matched = false;
+        qrModal.style.display = 'flex';
+        qrModal.setAttribute('aria-hidden','false');
+
+        try {
+            const constraints = { audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } } };
+            qrStream = await navigator.mediaDevices.getUserMedia(constraints);
+            qrVideo.srcObject = qrStream;
+            await qrVideo.play();
+
+            // Set overlay size to match rendered video size (clientSize)
+            const videoRect = qrVideo.getBoundingClientRect();
+            qrOverlay.width = qrVideo.videoWidth || Math.max(320, Math.round(videoRect.width));
+            qrOverlay.height = qrVideo.videoHeight || Math.max(180, Math.round(videoRect.height));
+            // However overlay canvas css must match displayed size - ensure it covers the video area
+            qrOverlay.style.width = videoRect.width + 'px';
+            qrOverlay.style.height = videoRect.height + 'px';
+
+            // Configure scan canvas (downsampled)
+            const vWidth = qrVideo.videoWidth || qrOverlay.width;
+            const vHeight = qrVideo.videoHeight || qrOverlay.height;
+            const scanW = Math.min(SCAN_WIDTH, vWidth);
+            const scanH = Math.round((scanW / vWidth) * vHeight);
+            scanCanvas.width = scanW;
+            scanCanvas.height = scanH;
+
+            scanning = true;
+            lastScan = 0;
+            requestAnimationFrame(qrTick);
+        } catch (err) {
+            console.error('Kamera konnte nicht gestartet werden:', err);
+            stopQRFlow();
+            alert('Kamerazugriff benötigt, um QR-Codes zu scannen.');
+        }
+    }
+
+    function stopQRFlow(){
+        scanning = false;
+        if(qrStream && qrStream.getTracks){
+            qrStream.getTracks().forEach(t => t.stop());
+        }
+        qrVideo.srcObject = null;
+        qrModal.style.display = 'none';
+        qrModal.setAttribute('aria-hidden','true');
+        // remove any anchored overlay if present
+        const prev = document.getElementById('domOverlay');
+        if(prev) prev.remove();
+    }
+
+    qrClose.addEventListener('click', ()=> stopQRFlow());
+
+    function qrTick(now){
+        if(!scanning) return;
+
+        // throttle scans to SCAN_INTERVAL
+        if(!lastScan) lastScan = now;
+        const elapsed = now - lastScan;
+        if(elapsed < SCAN_INTERVAL){
+            requestAnimationFrame(qrTick);
+            return;
+        }
+        lastScan = now;
+
+        if(qrVideo.readyState !== qrVideo.HAVE_ENOUGH_DATA){
+            requestAnimationFrame(qrTick);
+            return;
+        }
+
+        // Draw downsampled video frame into scanCanvas for jsQR (much faster)
+        const scanW = scanCanvas.width;
+        const scanH = scanCanvas.height;
+        try {
+            scanCtx.drawImage(qrVideo, 0, 0, scanW, scanH);
+        } catch(e){
+            // sometimes drawImage fails early; just retry next frame
+            requestAnimationFrame(qrTick);
+            return;
+        }
+
+        const imageData = scanCtx.getImageData(0, 0, scanW, scanH);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
+
+        // clear overlay (use displayed overlay size: match to video client rect)
+        const videoRect = qrVideo.getBoundingClientRect();
+        overlayCtx.clearRect(0, 0, qrOverlay.width, qrOverlay.height);
+        // adjust overlay canvas coordinate system so that code coords (scaled to video) map to overlay pixels
+        // We'll draw using the scan->video scale factor
+        if(code){
+            // compute scale from scanCanvas -> displayed video
+            const scaleX = videoRect.width / scanW;
+            const scaleY = videoRect.height / scanH;
+
+            // map location points from scan coords to overlay (viewport) coords relative to the video element
+            const tl = { x: code.location.topLeftCorner.x * scaleX, y: code.location.topLeftCorner.y * scaleY };
+            const tr = { x: code.location.topRightCorner.x * scaleX, y: code.location.topRightCorner.y * scaleY };
+            const br = { x: code.location.bottomRightCorner.x * scaleX, y: code.location.bottomRightCorner.y * scaleY };
+            const bl = { x: code.location.bottomLeftCorner.x * scaleX, y: code.location.bottomLeftCorner.y * scaleY };
+
+            // draw polygon on overlay canvas using coordinates relative to the displayed video size
+            // ensure overlay canvas has same backing pixel size as displayed video area (we set qrOverlay.width earlier to video natural width)
+            // But the overlayCtx draw operations use the overlay's internal pixel dimensions; we compensate by mapping to the overlay's width/height proportionally.
+            const overlayClientW = videoRect.width;
+            const overlayClientH = videoRect.height;
+            // If the overlay canvas backing resolution differs from client size, compute final scale:
+            const backingScaleX = qrOverlay.width / overlayClientW;
+            const backingScaleY = qrOverlay.height / overlayClientH;
+
+            function toOverlayPt(p){ return { x: p.x * backingScaleX, y: p.y * backingScaleY }; }
+
+            const otl = toOverlayPt(tl); const otr = toOverlayPt(tr); const obr = toOverlayPt(br); const obl = toOverlayPt(bl);
+
+            overlayCtx.lineWidth = Math.max(2, qrOverlay.width / 220);
+            overlayCtx.strokeStyle = 'rgba(251,191,36,0.95)';
+            overlayCtx.beginPath();
+            overlayCtx.moveTo(otl.x, otl.y);
+            overlayCtx.lineTo(otr.x, otr.y);
+            overlayCtx.lineTo(obr.x, obr.y);
+            overlayCtx.lineTo(obl.x, obl.y);
+            overlayCtx.closePath();
+            overlayCtx.stroke();
+
+            // center point in scan coords
+            const centerScanX = (code.location.topLeftCorner.x + code.location.bottomRightCorner.x) / 2;
+            const centerScanY = (code.location.topLeftCorner.y + code.location.bottomRightCorner.y) / 2;
+            const centerVideoX = centerScanX * scaleX;
+            const centerVideoY = centerScanY * scaleY;
+            const centerOverlayPt = toOverlayPt({ x: centerVideoX, y: centerVideoY });
+
+            // draw centered label on overlay (canvas) - use centered alignment
+            overlayCtx.font = `${Math.max(12, qrOverlay.width/36)}px sans-serif`;
+            overlayCtx.textAlign = 'center';
+            overlayCtx.textBaseline = 'middle';
+            overlayCtx.fillStyle = matched ? 'rgba(16,185,129,0.95)' : 'rgba(255,255,255,0.95)';
+
+            if(!matched && code.data === expectedValue){
+                matched = true;
+                overlayCtx.fillText('Code erkannt — Inhalt: ' + (code.data || ''), centerOverlayPt.x, centerOverlayPt.y - (qrOverlay.width/80));
+                // show lightweight transient DOM overlay positioned properly (updates each frame)
+                const videoClientRect = qrVideo.getBoundingClientRect();
+                const viewportX = Math.round(videoClientRect.left + centerVideoX + window.scrollX);
+                const viewportY = Math.round(videoClientRect.top + centerVideoY + window.scrollY);
+                updateTransientOverlay(viewportX, viewportY, 'Inhalt erkannt gut');
+            } else if(!matched) {
+                overlayCtx.fillText('Code erkannt — Inhalt: ' + (code.data || ''), centerOverlayPt.x, centerOverlayPt.y - (qrOverlay.width/80));
+                // show lightweight transient DOM overlay positioned properly (updates each frame)
+                const videoClientRect = qrVideo.getBoundingClientRect();
+                const viewportX = Math.round(videoClientRect.left + centerVideoX + window.scrollX);
+                const viewportY = Math.round(videoClientRect.top + centerVideoY + window.scrollY);
+                updateTransientOverlay(viewportX, viewportY, 'Inhalt erkannt schlecht');
+            }
+        } else {
+            // optional: clear transient overlay when nothing found
+            removeTransientOverlay();
+        }
+
+        requestAnimationFrame(qrTick);
+    }
+
+    // create/update a transient overlay that follows the detected QR until match or disappears
+    function updateTransientOverlay(viewportX, viewportY, text){
+        let el = document.getElementById('transientOverlay');
+        if(!el){
+            el = document.createElement('div');
+            el.id = 'transientOverlay';
+            el.className = 'qr-anchored-overlay';
+            document.body.appendChild(el);
+        }
+        el.textContent = text;
+        el.style.left = viewportX + 'px';
+        el.style.top = (viewportY - 24) + 'px';
+        el.style.opacity = '0.95';
+    }
+    function removeTransientOverlay(){
+        const el = document.getElementById('transientOverlay');
+        if(el) el.remove();
+    }
+
+    // create a persistent overlay anchored to viewport coords
+    function showDomOverlayAtViewport(viewportX, viewportY, message){
+        const prev = document.getElementById('domOverlay');
+        if(prev) prev.remove();
+        const el = document.createElement('div');
+        el.id = 'domOverlay';
+        el.className = 'qr-anchored-overlay pulse';
+        el.textContent = message;
+        el.style.left = viewportX + 'px';
+        el.style.top  = (viewportY - 12) + 'px';
+        document.body.appendChild(el);
+        // persistent by default; user can click to remove
+        el.title = 'Klicken zum Entfernen';
+        el.addEventListener('click', ()=> el.remove());
     }
 
     // === On load & keyboard ===
@@ -377,7 +483,6 @@ function confettiBurstFrom(originX, originY, count = 48) {
 
     document.addEventListener('DOMContentLoaded', ()=>{
         initMusic();
-        // wenn zuvor play gesetzt, versuchen beim Klick nochmal
         document.body.addEventListener('click', ()=> {
             const shouldPlay = localStorage.getItem(LS_PLAY_KEY) === 'true';
             if(shouldPlay && audio.paused){
