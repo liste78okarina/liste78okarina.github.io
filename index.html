@@ -156,7 +156,7 @@
         const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
         const SCAN_WIDTH = isMobile ? Math.min(360, Math.floor(window.innerWidth * 0.6)) : 640;
         // Auf mobilen Geräten etwas langsamer scannen, dafür weniger CPU/Power
-        const SCAN_INTERVAL = isMobile ? 16 : 16; // ms between scans (≈8-12 FPS mobile / ≈12-15 FPS desktop)
+        const SCAN_INTERVAL = isMobile ? 32 : 32; // ms between scans (≈8-12 FPS mobile / ≈12-15 FPS desktop)
 
 
     // === Elemente ===
@@ -470,21 +470,21 @@
 
     // create/update a transient overlay that follows the detected QR until match or disappears
     function updateTransientOverlay(viewportX, viewportY, text){
-        let el = document.getElementById('transientOverlay');
-        if(!el){
-            el = document.createElement('div');
-            el.id = 'transientOverlay';
-            el.className = 'qr-anchored-overlay';
-            el.style.whiteSpace = 'nowrap';
-            el.style.zIndex = 200;
-            document.body.appendChild(el);
-        }
-        el.textContent = text;
-        el.style.padding = isMobile ? '8px 12px' : '6px 10px';
-        el.style.fontSize = isMobile ? '14px' : '12px';
-        el.style.left = (viewportX) + 'px';
-        el.style.top  = (viewportY - (isMobile ? 32 : 24)) + 'px';
-        }
+    let el = document.getElementById('transientOverlay');
+    if(!el){
+        el = document.createElement('div');
+        el.id = 'transientOverlay';
+        el.className = 'qr-anchored-overlay';
+        el.style.whiteSpace = 'nowrap';
+        el.style.zIndex = 200;
+        document.body.appendChild(el);
+    }
+    el.textContent = text;
+    el.style.padding = isMobile ? '8px 12px' : '6px 10px';
+    el.style.fontSize = isMobile ? '14px' : '12px';
+    el.style.left = (viewportX) + 'px';
+    el.style.top  = (viewportY - (isMobile ? 32 : 24)) + 'px';
+    }
 
     function removeTransientOverlay(){
         const el = document.getElementById('transientOverlay');
