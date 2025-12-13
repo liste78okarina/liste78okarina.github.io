@@ -358,7 +358,7 @@
         });
     }
 
-    // Fügt interaktive Buttons hinzu (unverändert)
+    // Fügt interaktive Buttons hinzu (KORRIGIERT FÜR SCROLLING)
     function addChatButtons(buttons, container, handler) {
         container.innerHTML = '';
         buttons.forEach(btn => {
@@ -382,6 +382,10 @@
             };
             container.appendChild(button);
         });
+
+        // WICHTIGE KORREKTUR: Erzwinge Scrollen der Nachrichten, nachdem die Buttons 
+        // (die Platz am unteren Rand beanspruchen) hinzugefügt wurden.
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     // Steuert den Chat-Verlauf basierend auf Stages (MIT PAUSEN FÜR BESSEREN FLOW)
@@ -428,11 +432,11 @@
                 break;
                 
             case 'RECIPE':
-                //const recipeText = "Trixis *Blitz-Vanillekipferl*:\\n\\n1. **Zutaten:** 280g Mehl, 100g Zucker, 210g Butter, 1 Eigelb, 1 Prise Vanille.\\n2. **Zubereitung:** Alle Zutaten zügig vermengen. Kleine Kipferl formen.\\n3. **Backen:** 10-12 Min bei 180°C backen.\\n4. **Finish:** Noch warm in Puderzucker/Vanillezucker wenden. *Fertig in Rekordzeit!*\\n\\n";
-                // Sequenz: Nachricht 1 (Rezept) -> Pause -> Nachricht 2 (Aufforderung) -> Buttons
-                //addChatMessage({ sender: 'other', delay: 800, text: recipeText }, chatMessages)
-                window.open("https://www.chefkoch.de/rezepte/403911129675192/Uromas-Vanillekipferl.html","_blank")
-                pause(1800) // **Explizite Pause nach langem Text**
+                // Synchronen Aufruf zuerst ausführen (funktioniert, da es kein Promise zurückgibt)
+                window.open("https://www.chefkoch.de/rezepte/403911129675192/Uromas-Vanillekipferl.html","_blank");
+                
+                // Asynchrone Kette mit der Pause starten
+                pause(1800) // Explizite Pause nach dem Öffnen des Fensters
                 .then(() => addChatMessage({ sender: 'other', delay: 100, text: "Nun aber schnell zurück zum Geschenk! Die Zeit drängt! 🎁" }, chatMessages))
                 .then(() => {
                     addChatButtons([
