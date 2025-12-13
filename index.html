@@ -53,9 +53,9 @@
 
         .confetti{ position:fixed; pointer-events:none; transform-origin:center; will-change: transform, opacity; }
 
-        /* Musik-Button (Unverändert) */
+        /* Musik-Button (Z-INDEX KORREKTUR) */
         .music-control{
-            position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:120;
+            position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:40; /* Reduziert von 120 auf 40, damit Chat (z-50) darüber liegt */
             display:flex; align-items:center; gap:10px;
             background: rgba(0,0,0,0.45); padding:10px 14px; border-radius:999px;
             backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 30px rgba(0,0,0,0.45);
@@ -147,7 +147,14 @@
 
         <div id="chat-modal" class="hidden fixed inset-0 flex items-center justify-center z-50 px-4">
             <div class="glass rounded-2xl p-4 shadow-2xl transform scale-0 transition-all duration-500 ease-out border-2 border-white/30 w-full max-w-md h-[80vh] flex flex-col" id="chat-box" style="transform: scale(0) translateY(100px);">
-                <h3 class="text-white font-bold text-xl mb-4 border-b border-white/10 pb-2 text-center drop-shadow">Support - Elfen-Post ✨</h3>
+                
+                <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-2 drop-shadow">
+                    <h3 class="text-white font-bold text-xl drop-shadow">Support - Elfen-Post ✨</h3>
+                    <button onclick="toggleChat(false)" class="text-white opacity-70 hover:opacity-100 transition-opacity p-1" aria-label="Chat minimieren">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M5 12h14"/></svg>
+                    </button>
+                </div>
+
                 <div id="chat-messages" class="flex-grow overflow-y-auto space-y-3 p-2 custom-scrollbar">
                     </div>
                 <div id="chat-buttons" class="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-3 justify-center">
@@ -176,6 +183,10 @@
 
     <div id="music-note" style="position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:rgba(0,0,0,0.6);color:#fff;padding:8px 12px;border-radius:10px;font-size:13px;display:none;z-index:130;">Zum Starten antippen</div>
 
+    <button id="chat-min-button" class="hidden fixed right-4 bottom-24 sm:right-8 sm:bottom-8 z-50 p-4 rounded-full bg-red-600 text-white shadow-xl transition-all duration-300 transform hover:scale-105" aria-label="Chat öffnen" onclick="toggleChat(true)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 15.15 15.15 0 0 1-5.65 6.4 15.24 15.24 0 0 1-4.4 1.45 8.38 8.38 0 0 1-6.1-2.9 8.38 8.38 0 0 1-2.9-6.1A8.44 8.44 0 0 1 2.5 12a8.38 8.38 0 0 1 3.8-.9 15.15 15.15 0 0 1 6.4-5.65 15.24 15.24 0 0 1 1.45-4.4A8.38 8.38 0 0 1 21 11.5z"/></svg>
+    </button>
+
 <script>
     // === Elemente & Konstanten ===
     const audio = document.getElementById('bg-music');
@@ -190,6 +201,11 @@
     // Chat Elemente
     const chatMessages = document.getElementById('chat-messages');
     const chatButtons = document.getElementById('chat-buttons');
+    
+    // NEUE ELEMENTE FÜR MINIMIERUNG
+    const chatModal = document.getElementById('chat-modal');
+    const chatBox = document.getElementById('chat-box');
+    const chatMinButton = document.getElementById('chat-min-button');
 
     // --- Neue Hilfsfunktion für explizite Pausen ---
     function pause(duration) {
@@ -324,6 +340,29 @@
     }
 
     // === INTERAKTIVER CHAT FUNKTIONALITÄT ===
+
+    // NEUE FUNKTION: Minimieren und Maximieren des Chats
+    function toggleChat(maximize) {
+        if (maximize) {
+            // Maximieren: zeige Modal, verstecke Minimier-Button
+            chatModal.classList.remove('hidden');
+            // Timeout, damit 'hidden' entfernt ist, bevor die Animation startet
+            setTimeout(() => {
+                chatBox.style.transform = 'scale(1) translateY(0)';
+            }, 30);
+            chatMinButton.classList.add('hidden');
+        } else {
+            // Minimieren: starte Schließ-Animation, zeige Minimier-Button
+            chatBox.style.transform = 'scale(0) translateY(100px)';
+            
+            // Warte auf Animationsende, dann verstecke den Container
+            setTimeout(() => {
+                chatModal.classList.add('hidden');
+                chatMinButton.classList.remove('hidden');
+            }, 500); // Passt zur transition-all Dauer in der CSS
+        }
+    }
+
 
     // Fügt eine Nachricht in den Chat ein (mit Markdown- und Zeilenumbruch-Support)
     function addChatMessage(messageObj, container, delay=0){
@@ -464,8 +503,6 @@
 
         const lid = document.getElementById('gift-lid');
         const box = document.getElementById('gift-box');
-        const chatModal = document.getElementById('chat-modal');
-        const chatBox = document.getElementById('chat-box');
         const bowLeft = document.getElementById('bow-left');
         const bowRight = document.getElementById('bow-right');
         const bowCenter = document.getElementById('bow-center');
@@ -503,13 +540,8 @@
                 giftContainer.style.opacity = '0';
                 giftContainer.style.transform = 'translateY(150px) scale(0.9)';
 
-                // Chat-Modal einfahren
-                chatModal.classList.remove('hidden');
-                
-                // setze scale-100 und transform: translateY(0)
-                setTimeout(()=> chatBox.style.transform = 'scale(1) translateY(0)', 30);
-                
-                // Starte den interaktiven Chat-Dialog
+                // Starte den interaktiven Chat-Dialog (Maximiert)
+                toggleChat(true); 
                 handleChatStage('START');
             }, 1500); 
 
