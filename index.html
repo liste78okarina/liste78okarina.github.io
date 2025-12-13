@@ -3,33 +3,63 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Weihnachtsgeschenk — QR verbessert</title>
+    <title>Weihnachtsgeschenk</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        :root{--red-primary:#dc2626;--gold:#fbbf24;--green:#059669}
-        @keyframes shake {0%,100%{transform:rotate(0deg)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+        /* === Farbanpassungen für einen modernen, cleanen Look === */
+        :root{
+            --red-primary:#b40000;      /* Tiefrot */
+            --gold-muted:#C7A868;       /* Mattes Champagner-Gold */
+            --silver:#E0E0E0;           /* Helles Silber für Schnee/Akzente */
+            --blue-chat:#3b82f6;        /* Helles Blau für Chat (Me) */
+            --red-chat:#dc2626;         /* Klassisches Rot für Chat (Other - Bilbo) */
+            --bg-dark:#091a38;          /* Sehr dunkles, tiefes Blau */
+        }
+        
+        /* Basis-Animationen / Styles */
+        @keyframes shake {0%,100%{transform:rotate(0deg)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}} /* Sanfteres Schütteln */
         @keyframes openGift {0%{transform:rotateX(0deg)}100%{transform:rotateX(-120deg)}}
         @keyframes openBowLeft {0%{transform:translate(0,0) rotate(-12deg)}100%{transform:translate(-60px,-20px) rotate(-45deg);opacity:0}}
         @keyframes openBowRight {0%{transform:translate(0,0) rotate(12deg)}100%{transform:translate(60px,-20px) rotate(45deg);opacity:0}}
         @keyframes openBowCenter {0%{transform:translate(-50%,-50%) rotate(45deg) scale(1)}100%{transform:translate(-50%,-50%) rotate(45deg) scale(0);opacity:0}}
-        @keyframes fall {0% { transform: translateY(-10vh);}100%{ transform: translateY(110vh);}}
-        @keyframes sparkle {0%,100%{opacity:0.3}50%{opacity:1}}
+        @keyframes fall {0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); }}
+        
+        /* Cleaner Hintergrund: Nur tiefe Farbe, kein starkes Glitzer-Overlay */
+        body{ background: var(--bg-dark); position:relative; overflow:hidden; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
+        body::before{ display: none; } /* Glitzer entfernt */
 
-        body{ background: radial-gradient(ellipse at top,#1e3a8a,#1e1b4b); position:relative; overflow:hidden; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial;}
-        body::before{ content:''; position:absolute; inset:0; background: radial-gradient(2px 2px at 20% 30%, white, transparent), radial-gradient(2px 2px at 60% 70%, white, transparent), radial-gradient(1px 1px at 50% 50%, white, transparent); background-size:200px 200px; animation: sparkle 4s ease-in-out infinite; pointer-events:none; opacity:0.8 }
+        /* Geschenk-Styles: Cleaner, weniger Muster, tiefe Farbe */
+        .gift-pattern{ background-image: none; } 
+        #gift-lid > div, #gift-box {
+            background-color: var(--red-primary); 
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.2) 100%), var(--red-primary); 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6); 
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        /* Mattes Metallic-Band */
+        .ribbon-shine, .bow-shine{ 
+            background: var(--gold-muted); 
+            box-shadow: 0 0 10px rgba(0,0,0,0.2); 
+        }
 
-        .gift-pattern{ background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.08) 10px, rgba(255,255,255,0.08) 20px); }
-        .ribbon-shine{ background:linear-gradient(135deg,#fde68a 0%,#fbbf24 50%,#f59e0b 100%); }
-        .bow-shine{ background:linear-gradient(135deg,#fde68a 0%,#fbbf24 50%,#f59e0b 100%); }
-
-        .snowflake{ position:absolute; background:white; border-radius:50%; pointer-events:none; animation: fall linear forwards; opacity:0.85; }
-
-        .glass{ background: rgba(255,255,255,0.06); backdrop-filter: blur(8px); border:1px solid rgba(255,255,255,0.08); }
+        .snowflake{ position:absolute; background:var(--silver); border-radius:50%; pointer-events:none; animation: fall linear forwards; opacity:0.85; }
+        
+        /* Verbessertes Glassmorphismus */
+        .glass{ 
+            background: rgba(255,255,255,0.05); 
+            backdrop-filter: blur(12px); 
+            border:1px solid rgba(255,255,255,0.05); 
+        }
 
         .confetti{ position:fixed; pointer-events:none; transform-origin:center; will-change: transform, opacity; }
 
-        .music-control{ position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:120; display:flex; align-items:center; gap:10px; background: rgba(0,0,0,0.45); padding:10px 14px; border-radius:999px; backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 30px rgba(0,0,0,0.45); }
+        /* Musik-Button (Unverändert) */
+        .music-control{
+            position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:120;
+            display:flex; align-items:center; gap:10px;
+            background: rgba(0,0,0,0.45); padding:10px 14px; border-radius:999px;
+            backdrop-filter: blur(6px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 30px rgba(0,0,0,0.45);
+        }
         .music-btn{ width:48px; height:48px; display:grid; place-items:center; border-radius:999px; background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); cursor:pointer; border:1px solid rgba(255,255,255,0.06);}
         .music-title{ color:#fff; font-weight:600; font-size:13px; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis;}
         .music-state{ color:#e6e6e6; font-size:12px; opacity:0.9; }
@@ -39,43 +69,53 @@
         .open-bow-left{ animation: openBowLeft 0.5s ease-out forwards; }
         .open-bow-right{ animation: openBowRight 0.5s ease-out forwards; }
         .open-bow-center{ animation: openBowCenter 0.5s ease-out forwards; }
+        
+        /* === CHAT STYLES === */
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 
-        /* QR Modal & Video overlay styling */
-        #qr-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:80; background:linear-gradient(180deg, rgba(3,7,18,0.6), rgba(3,7,18,0.85)); }
-        .qr-card { width: min(720px, 92vw); max-width:720px; aspect-ratio: 16/10; position:relative; border-radius:18px; overflow:hidden; box-shadow: 0 30px 80px rgba(2,6,23,0.75); border:1px solid rgba(255,255,255,0.06); background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); display:flex; align-items:center; justify-content:center; }
-        #qr-video { width:100%; height:100%; object-fit:cover; display:block; }
-        #qr-overlay { position:absolute; inset:0; pointer-events:none; }
-        .qr-hint { position:absolute; left:12px; top:12px; font-weight:700; color:var(--gold); background:rgba(0,0,0,0.45); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,0.04); }
-        .qr-close { position:absolute; right:12px; top:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:8px; border-radius:10px; cursor:pointer; color:#fff; }
-        .qr-anchored-overlay { position:fixed; transform:translate(-50%,-120%); z-index:90; pointer-events:auto; background:linear-gradient(180deg, rgba(0,0,0,0.8), rgba(10,10,10,0.6)); color:var(--gold); padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); font-weight:700; box-shadow:0 10px 30px rgba(0,0,0,0.6); }
+        .chat-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 20px;
+            color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+            position: relative;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInBubble 0.3s ease-out forwards;
+            font-weight: 500;
+        }
 
-        .pulse { animation: pulse 1s ease-out 0s 2; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251,191,36,0.8); } 100% { box-shadow: 0 0 0 18px rgba(251,191,36,0); } }
+        .bubble-me {
+            background-color: var(--blue-chat); 
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
 
-                    /* QR Modal - mobile-first: full screen on narrow devices */
-            #qr-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:80; background:linear-gradient(180deg, rgba(3,7,18,0.6), rgba(3,7,18,0.85)); }
+        .bubble-other {
+            background-color: var(--red-chat); 
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
 
-            /* Default: card */
-            .qr-card { width: min(720px, 92vw); max-width:720px; aspect-ratio:16/10; border-radius:18px; }
-
-            /* Mobile: full-bleed video and overlay */
-            @media (max-width:820px) {
-            .qr-card { width:100vw; height:100vh; max-width:none; aspect-ratio: auto; border-radius:0; }
-            #qr-video { width:100%; height:100%; object-fit:cover; }
-            #qr-overlay { position:absolute; left:0; top:0; width:100%; height:100%; }
-            .qr-hint { left:12px; top:12px; }
-            .qr-close { right:12px; top:12px; }
-            }
-
+        @keyframes fadeInBubble {
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
 
-    <!-- Geschenk -->
+    <div class="fixed top-4 left-0 right-0 flex justify-center gap-6 z-0 pointer-events:none">
+        </div>
+    <div class="fixed left-4 bottom-8 opacity-20"><div class="tree relative"><div class="tree-trunk"></div></div></div>
+    <div class="fixed right-4 bottom-8 opacity-20"><div class="tree relative"><div class="tree-trunk"></div></div></div>
+
     <div class="text-center relative z-10 px-4">
-        <div id="gift-container" class="relative cursor-pointer perspective-1000" onclick="openGift()">
+        <div id="gift-container" class="relative cursor-pointer perspective-1000 transition-all duration-800 ease-out" onclick="openGift()">
             <div id="gift-lid" class="relative z-10 mb-1 sm:mb-2">
-                <div class="w-40 h-14 sm:w-56 sm:h-20 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-t-lg mx-auto shadow-2xl gift-pattern border-2 sm:border-4 border-red-800 relative overflow-visible">
+                <div class="w-40 h-14 sm:w-56 sm:h-20 rounded-t-lg mx-auto shadow-2xl gift-pattern border-2 sm:border-4 border-red-800 relative overflow-visible">
                     <div class="absolute top-1 left-2 w-14 h-6 sm:top-2 sm:left-4 sm:w-20 sm:h-8 bg-white opacity-20 rounded-full blur-sm"></div>
                     <div class="absolute top-1/2 left-0 right-0 h-4 sm:h-6 ribbon-shine transform -translate-y-1/2 shadow-lg border-t border-b sm:border-t-2 sm:border-b-2 border-yellow-600 z-10"></div>
                     <div class="absolute top-1/2 left-0 right-0 h-0.5 sm:h-1 bg-yellow-300 transform -translate-y-1/2 z-10"></div>
@@ -94,7 +134,7 @@
                 </div>
             </div>
 
-            <div id="gift-box" class="w-40 h-40 sm:w-56 sm:h-56 bg-gradient-to-br from-red-500 via-red-600 to-red-800 mx-auto shadow-2xl rounded-b-lg relative gift-pattern border-2 sm:border-4 border-red-800 z-20">
+            <div id="gift-box" class="w-40 h-40 sm:w-56 sm:h-56 mx-auto shadow-2xl rounded-b-lg relative gift-pattern border-2 sm:border-4 border-red-800 z-20">
                 <div class="absolute top-2 left-3 w-16 h-20 sm:top-4 sm:left-6 sm:w-24 sm:h-32 bg-white opacity-20 rounded-full blur-md"></div>
                 <div class="absolute top-0 bottom-0 left-1/2 w-5 sm:w-8 ribbon-shine transform -translate-x-1/2 shadow-lg border-l border-r sm:border-l-2 sm:border-r-2 border-yellow-600"></div>
                 <div class="absolute top-0 bottom-0 left-1/2 w-0.5 sm:w-1 bg-yellow-300 transform -translate-x-1/2"></div>
@@ -105,18 +145,21 @@
             </div>
         </div>
 
-        <div id="message" class="hidden fixed inset-0 flex items-center justify-center z-50 px-4">
-            <div class="glass rounded-2xl p-4 sm:p-8 shadow-2xl transform scale-0 transition-transform duration-500 border-2 border-white/30 max-w-sm" id="message-box">
-                <div id="typed-text" class="text-white font-bold text-lg sm:text-2xl drop-shadow-lg text-center"></div>
+        <div id="chat-modal" class="hidden fixed inset-0 flex items-center justify-center z-50 px-4">
+            <div class="glass rounded-2xl p-4 shadow-2xl transform scale-0 transition-all duration-500 ease-out border-2 border-white/30 w-full max-w-md h-[80vh] flex flex-col" id="chat-box" style="transform: scale(0) translateY(100px);">
+                <h3 class="text-white font-bold text-xl mb-4 border-b border-white/10 pb-2 text-center drop-shadow">Support - Elfen-Post ✨</h3>
+                <div id="chat-messages" class="flex-grow overflow-y-auto space-y-3 p-2 custom-scrollbar">
+                    </div>
+                <div id="chat-buttons" class="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-3 justify-center">
+                    </div>
             </div>
         </div>
 
         <div class="fixed inset-0 pointer-events-none" id="snow-container"></div>
     </div>
 
-    <!-- Audio -->
     <audio id="bg-music" loop preload="auto">
-        <source src="dein_lied.mp3" type="audio/mpeg">
+        <source src="dein_lied.mp3" type="audio/mpeg"> 
         Dein Browser unterstützt kein Audio-Tag.
     </audio>
 
@@ -133,33 +176,8 @@
 
     <div id="music-note" style="position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:rgba(0,0,0,0.6);color:#fff;padding:8px 12px;border-radius:10px;font-size:13px;display:none;z-index:130;">Zum Starten antippen</div>
 
-    <!-- QR Modal -->
-    <div id="qr-modal" aria-hidden="true">
-        <div class="qr-card glass">
-            <div class="qr-hint">Suche QR-Code</div>
-            <button class="qr-close" id="qr-close" title="Scanner schließen">✕</button>
-            <video id="qr-video" autoplay playsinline muted></video>
-            <canvas id="qr-overlay"></canvas>
-        </div>
-    </div>
-
-    <!-- hidden scan canvas (smaller, used for jsQR) -->
-    <canvas id="scan-canvas" style="display:none"></canvas>
-
-    <!-- jsQR CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-
 <script>
-    // === Konfiguration ===
-    const expectedValue = "https://liste78okarina.github.io"; // anpassen
-    // Ersetze bestehende SCAN_WIDTH / SCAN_INTERVAL Konstanten durch diese Logik:
-        const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-        const SCAN_WIDTH = isMobile ? Math.min(360, Math.floor(window.innerWidth * 0.6)) : 640;
-        // Auf mobilen Geräten etwas langsamer scannen, dafür weniger CPU/Power
-        const SCAN_INTERVAL = isMobile ? 32 : 32; // ms between scans (≈8-12 FPS mobile / ≈12-15 FPS desktop)
-
-
-    // === Elemente ===
+    // === Elemente & Konstanten ===
     const audio = document.getElementById('bg-music');
     const toggleBtn = document.getElementById('music-toggle');
     const iconPlay = document.getElementById('icon-play');
@@ -168,35 +186,58 @@
     const musicNote = document.getElementById('music-note');
     const LS_PLAY_KEY = 'xmasMusicPlaying';
     audio.volume = 0.6;
+    
+    // Chat Elemente
+    const chatMessages = document.getElementById('chat-messages');
+    const chatButtons = document.getElementById('chat-buttons');
 
-    const qrModal = document.getElementById('qr-modal');
-    const qrVideo = document.getElementById('qr-video');
-    const qrOverlay = document.getElementById('qr-overlay');
-    const qrClose = document.getElementById('qr-close');
+    // --- Neue Hilfsfunktion für explizite Pausen ---
+    function pause(duration) {
+        return new Promise(resolve => setTimeout(resolve, duration));
+    }
 
-    const scanCanvas = document.getElementById('scan-canvas');
-    const scanCtx = scanCanvas.getContext('2d');
-    const overlayCtx = qrOverlay.getContext('2d');
-
-    // State
-    let qrStream = null;
-    let scanning = false;
-    let matched = false;
-    let lastScan = 0;
-
-    // --- Musik helpers (unchanged) ---
+    // --- Musik-Helfer (unverändert) ---
     function updateToggleUI(isPlaying){
         if(isPlaying){ iconPlay.style.display='none'; iconPause.style.display='block'; musicState.textContent='Wiedergabe'; toggleBtn.setAttribute('aria-label','Musik pausieren'); }
         else { iconPlay.style.display='block'; iconPause.style.display='none'; musicState.textContent='Pause'; toggleBtn.setAttribute('aria-label','Musik abspielen'); }
     }
     function showStartHint(){ musicNote.style.display='block'; musicNote.style.opacity='1'; setTimeout(()=>{ musicNote.style.opacity='0'; }, 2200); setTimeout(()=>{ musicNote.style.display='none'; }, 2500); }
-    function fadeAudioTo(targetVolume=0.6,duration=700){ const start=audio.volume; const diff=targetVolume-start; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0; const t=setInterval(()=>{ cur++; audio.volume = Math.min(1, Math.max(0, start + diff*(cur/steps))); if(cur>=steps) clearInterval(t); }, stepTime); }
-    function fadeOutAndPause(duration=400){ const start=audio.volume; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0; const t=setInterval(()=>{ cur++; audio.volume = Math.max(0, start * (1 - cur/steps)); if(cur>=steps){ clearInterval(t); audio.pause(); } }, stepTime); }
-    async function toggleMusic(userInitiated=true){ if(audio.paused){ try{ await audio.play(); if(userInitiated) fadeAudioTo(0.6,700); localStorage.setItem(LS_PLAY_KEY,'true'); updateToggleUI(true); }catch(err){ showStartHint(); updateToggleUI(false); console.warn('Play blockiert:',err); } } else { fadeOutAndPause(400); localStorage.setItem(LS_PLAY_KEY,'false'); updateToggleUI(false); } }
+    function fadeAudioTo(targetVolume=0.6,duration=700){
+        const start=audio.volume; const diff=targetVolume-start; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0;
+        const t=setInterval(()=>{ cur++; audio.volume = Math.min(1, Math.max(0, start + diff*(cur/steps))); if(cur>=steps) clearInterval(t); }, stepTime);
+    }
+    function fadeOutAndPause(duration=400){
+        const start=audio.volume; const stepTime=40; const steps=Math.max(1,Math.floor(duration/stepTime)); let cur=0;
+        const t=setInterval(()=>{ cur++; audio.volume = Math.max(0, start * (1 - cur/steps)); if(cur>=steps){ clearInterval(t); audio.pause(); } }, stepTime);
+    }
+    async function toggleMusic(userInitiated=true){
+        if(audio.paused){
+            try{
+                await audio.play();
+                if(userInitiated) fadeAudioTo(0.6,700);
+                localStorage.setItem(LS_PLAY_KEY,'true');
+                updateToggleUI(true);
+            }catch(err){
+                showStartHint();
+                updateToggleUI(false);
+                console.warn('Play blockiert:',err);
+            }
+        } else {
+            fadeOutAndPause(400);
+            localStorage.setItem(LS_PLAY_KEY,'false');
+            updateToggleUI(false);
+        }
+    }
     toggleBtn.addEventListener('click', ()=> toggleMusic(true));
-    function initMusic(){ const shouldPlay = localStorage.getItem(LS_PLAY_KEY) === 'true'; updateToggleUI(shouldPlay); if(shouldPlay){ audio.play().then(()=> updateToggleUI(true)).catch(()=> { updateToggleUI(false); showStartHint(); }); } }
+    function initMusic(){
+        const shouldPlay = localStorage.getItem(LS_PLAY_KEY) === 'true';
+        updateToggleUI(shouldPlay);
+        if(shouldPlay){
+            audio.play().then(()=> updateToggleUI(true)).catch(()=> { updateToggleUI(false); showStartHint(); });
+        }
+    }
 
-    // === Schneeflocken (unchanged) ===
+    // --- Schneeflocken (unverändert) ---
     function createSnowflake(){
         const snowflake = document.createElement('div');
         snowflake.className = 'snowflake';
@@ -215,7 +256,7 @@
     }
     setInterval(createSnowflake, 200);
 
-    // === Konfetti (unchanged) ===
+    // --- Konfetti (unverändert) ---
     function confettiBurstFrom(originX, originY, count = 48) {
         const colors = ['#f59e0b','#fbbf24','#dc2626','#10b981','#fff1c2'];
         const confettis = [];
@@ -232,22 +273,31 @@
             el.style.left = originX + 'px';
             el.style.top  = originY + 'px';
             el.style.position = 'fixed';
-            el.style.zIndex = 40;
+            el.style.zIndex = 10;
             el.style.opacity = '1';
             el.style.willChange = 'transform, opacity';
             document.body.appendChild(el);
-            const angle = (-130 + Math.random() * 70) * (Math.PI / 180);
-            const speed = 600 + Math.random() * 450;
+            const angle = (-125 + Math.random() * 70) * (Math.PI / 180);
+            const speed = 600 + Math.random() * 400;
             const vx = Math.cos(angle) * speed;
             const vy = Math.sin(angle) * speed;
             const rot = Math.random() * 360;
             const rotV = (Math.random() * 600 - 300);
-            confettis.push({ el, x: originX, y: originY, vx, vy, rot, rotV, birth: performance.now(), life: 0 });
+            confettis.push({
+                el,
+                x: originX,
+                y: originY,
+                vx, vy,
+                rot, rotV,
+                birth: performance.now(),
+                life: 0
+            });
         }
         const gravity = 1200;
         let last = performance.now();
         function frame(now) {
-            const dtMs = now - last; last = now;
+            const dtMs = now - last;
+            last = now;
             const dt = dtMs / 1000;
             for (let i = confettis.length - 1; i >= 0; i--) {
                 const p = confettis[i];
@@ -256,280 +306,213 @@
                 p.y += p.vy * dt;
                 p.rot += p.rotV * dt;
                 p.life += dt;
+                const tx = p.x - (p.el._originX ?? p.x);
+                const ty = p.y - (p.el._originY ?? p.y);
                 p.el.style.transform = `translate(${p.x - originX}px, ${p.y - originY}px) rotate(${p.rot}deg)`;
                 if (p.life > 2.4) {
                     const fade = Math.max(0, 1 - (p.life - 2.4) / 1.4);
                     p.el.style.opacity = String(fade);
                 }
-                if (p.y > window.innerHeight + 200 || p.life > 6) { p.el.remove(); confettis.splice(i, 1); }
+                if (p.y > window.innerHeight + 200 || p.life > 6) {
+                    p.el.remove();
+                    confettis.splice(i, 1);
+                }
             }
             if (confettis.length > 0) requestAnimationFrame(frame);
         }
         requestAnimationFrame(frame);
     }
 
-    // === Geschenk öffnen ===
+    // === INTERAKTIVER CHAT FUNKTIONALITÄT ===
+
+    // Fügt eine Nachricht in den Chat ein (mit Markdown- und Zeilenumbruch-Support)
+    function addChatMessage(messageObj, container, delay=0){
+        return new Promise(resolve => {
+            setTimeout(() => {
+                const isMe = messageObj.sender === 'me';
+                const wrapper = document.createElement('div');
+                wrapper.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+
+                const bubble = document.createElement('div');
+                bubble.className = `chat-bubble ${isMe ? 'bubble-me' : 'bubble-other'}`;
+                
+                let htmlContent = messageObj.text;
+                
+                // 0. KORRIGIERT: Line breaks (\\n) zu <br>
+                htmlContent = htmlContent.replace(/\\n/g, '<br>');
+
+                // 1. Fett (**text**) -> <b>text</b>
+                htmlContent = htmlContent.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                // 2. Kursiv (*text*) -> <i>text</i>
+                htmlContent = htmlContent.replace(/\*(.*?)\*/g, '<i>$1</i>');
+
+                bubble.innerHTML = htmlContent; // Verwende innerHTML für HTML-Formatierung
+
+                wrapper.appendChild(bubble);
+                container.appendChild(wrapper);
+
+                // Autoscroll zum neuesten Element
+                container.scrollTop = container.scrollHeight;
+                resolve();
+            }, delay);
+        });
+    }
+
+    // Fügt interaktive Buttons hinzu (unverändert)
+    function addChatButtons(buttons, container, handler) {
+        container.innerHTML = '';
+        buttons.forEach(btn => {
+            const button = document.createElement('button');
+            button.className = 'px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg bg-white/10 text-white hover:bg-white/20 backdrop-filter backdrop-blur-sm';
+            button.textContent = btn.text;
+            
+            button.onclick = () => {
+                // Deaktiviert alle Buttons
+                container.querySelectorAll('button').forEach(b => {
+                    b.disabled = true;
+                    b.classList.add('opacity-50', 'cursor-not-allowed');
+                    b.classList.remove('hover:scale-105', 'hover:bg-white/20');
+                });
+
+                // Fügt die geklickte Option als Benutzer-Nachricht hinzu
+                addChatMessage({ sender: 'me', delay: 0, text: btn.text }, chatMessages);
+
+                // Wechselt zur nächsten Stufe
+                setTimeout(() => handler(btn.nextStage), 500);
+            };
+            container.appendChild(button);
+        });
+    }
+
+    // Steuert den Chat-Verlauf basierend auf Stages (MIT PAUSEN FÜR BESSEREN FLOW)
+    async function handleChatStage(stage) {
+        chatButtons.innerHTML = ''; // Buttons entfernen, während Bilbo antwortet
+
+        switch (stage) {
+            case 'START':
+                addChatMessage({ sender: 'other', delay: 800, text: "Ho Ho Ho! Hier spricht *Bilbo* vom **Team der Elfen-Post** des Weihnachtsmanns. Deine Verbindung war etwas holprig, aber ich bin hier! Wie kann ich dir im vorweihnachtlichen Chaos beistehen?" }, chatMessages).then(() => {
+                    addChatButtons([
+                        { text: "Suche mein Geschenk!", nextStage: 'ASK_PROMISE' },
+                        { text: "Ich brauche Hilfe beim Plätzchenbacken.", nextStage: 'FALLBACK_1' }
+                    ], chatButtons, handleChatStage);
+                });
+                break;
+
+            case 'ASK_PROMISE':
+                addChatMessage({ sender: 'other', delay: 1500, text: "Wunderbar! Bevor wir zur Geschenke-Übergabe übergehen, eine wichtige Formalität (Boss-Anweisung!): Versprichst du mir, zukünftige Geschenke **NICHT** immer komplett einzeln zu verpacken (denkt denn niemand an das Geschenkpapier-Lager?!) und natürlich *lieb* zu sein? 😉" }, chatMessages).then(() => {
+                    addChatButtons([
+                        { text: "Ja, versprochen! Für das Papier-Lager!", nextStage: 'SUCCESS' },
+                        { text: "Nein, ich liebe das Chaos.", nextStage: 'FALLBACK_2' }
+                    ], chatButtons, handleChatStage);
+                });
+                break;
+
+            case 'SUCCESS':
+                // Sequenz: Nachricht 1 -> Pause -> Nachricht 2
+                addChatMessage({ sender: 'other', delay: 1200, text: "Perfekt, dein Versprechen ist im goldenen Buch registriert. Wir hoffen sehr du hälst dein Versprechen!" }, chatMessages)
+                .then(() => pause(2500)) // **Wartezeit erhöht und explizit**
+                .then(() => addChatMessage({ sender: 'other', delay: 100, text: "Schau am besten *noch einmal* unter den Baum... Vielleicht ist es an den falschen Empfänger addressiert. 🐾 Ich wünsche dir magische Feiertage und frohe Weihnachten! Tschüss und bis nächstes Jahr! 🎄" }, chatMessages));
+                break;
+
+            case 'FALLBACK_1':
+                // Sequenz: Nachricht 1 -> Pause -> Nachricht 2 -> Buttons
+                addChatMessage({ sender: 'other', delay: 1000, text: "Uff, mein Fachgebiet ist die *globale Nordpol-Logistik* – die Küche ist eher Trixis Revier! Aber warte mal, ich habe hier einen Zettel..." }, chatMessages)
+                .then(() => pause(1800)) // **Explizite Pause**
+                .then(() => addChatMessage({ sender: 'other', delay: 100, text: "Ah, Trixi hat mir ihr super-geheimes Rezept für *Blitz-Vanillekipferl* zugesteckt. Möchtest du es lieber sehen, oder gleich das Geschenk suchen?" }, chatMessages))
+                .then(() => {
+                    addChatButtons([
+                        { text: "Trixis Rezept öffnen", nextStage: 'RECIPE' },
+                        { text: "Zurück zum Geschenk-Support", nextStage: 'START' }
+                    ], chatButtons, handleChatStage);
+                });
+                break;
+                
+            case 'RECIPE':
+                //const recipeText = "Trixis *Blitz-Vanillekipferl*:\\n\\n1. **Zutaten:** 280g Mehl, 100g Zucker, 210g Butter, 1 Eigelb, 1 Prise Vanille.\\n2. **Zubereitung:** Alle Zutaten zügig vermengen. Kleine Kipferl formen.\\n3. **Backen:** 10-12 Min bei 180°C backen.\\n4. **Finish:** Noch warm in Puderzucker/Vanillezucker wenden. *Fertig in Rekordzeit!*\\n\\n";
+                // Sequenz: Nachricht 1 (Rezept) -> Pause -> Nachricht 2 (Aufforderung) -> Buttons
+                //addChatMessage({ sender: 'other', delay: 800, text: recipeText }, chatMessages)
+                window.open("https://www.chefkoch.de/rezepte/403911129675192/Uromas-Vanillekipferl.html","_blank")
+                pause(1800) // **Explizite Pause nach langem Text**
+                .then(() => addChatMessage({ sender: 'other', delay: 100, text: "Nun aber schnell zurück zum Geschenk! Die Zeit drängt! 🎁" }, chatMessages))
+                .then(() => {
+                    addChatButtons([
+                        { text: "Zum Geschenke-Versprechen", nextStage: 'ASK_PROMISE' }
+                    ], chatButtons, handleChatStage);
+                });
+                break;
+
+            case 'FALLBACK_2':
+            addChatMessage({ sender: 'other', delay: 1000, text: "Das kann ich leider nicht akzeptieren, wir sind hier schließlich nicht in der Chaos-Abteilung. Ohne das Versprechen kann ich die Route nicht freigeben. Überdenke deine Antwort. 🎁" }, chatMessages).then(() => {
+                addChatButtons([
+                    { text: "Ich überlege es mir anders...", nextStage: 'ASK_PROMISE' }
+                ], chatButtons, handleChatStage);
+            });
+            break;
+        }
+    }
+
+
+    // === Geschenk öffnen (Angepasst für sanften Übergang) ===
     let isOpen = false;
     async function openGift(){
         if(isOpen) return;
         isOpen = true;
+
         const lid = document.getElementById('gift-lid');
         const box = document.getElementById('gift-box');
+        const chatModal = document.getElementById('chat-modal');
+        const chatBox = document.getElementById('chat-box');
         const bowLeft = document.getElementById('bow-left');
         const bowRight = document.getElementById('bow-right');
         const bowCenter = document.getElementById('bow-center');
         const giftContainer = document.getElementById('gift-container');
 
+        // Nutzeraktion: starte Musik falls pausiert
         toggleMusic(true);
+
+        // 1. kurz schütteln
         giftContainer.classList.add('shake');
         setTimeout(()=> giftContainer.classList.remove('shake'), 600);
-        setTimeout(()=>{ bowLeft.classList.add('open-bow-left'); bowRight.classList.add('open-bow-right'); bowCenter.classList.add('open-bow-center'); }, 300);
 
+        // 2. Öffnen-Bows
+        setTimeout(()=>{
+            bowLeft.classList.add('open-bow-left');
+            bowRight.classList.add('open-bow-right');
+            bowCenter.classList.add('open-bow-center');
+        }, 300);
+
+        // 3. Deckel öffnen & Konfetti
         setTimeout(()=>{
             lid.classList.add('open-lid');
+
+            // Konfetti aus der Box schießen
             setTimeout(()=> {
                 const rect = box.getBoundingClientRect();
                 const originX = Math.round(rect.left + rect.width/2);
-                const originY = Math.round(rect.top + rect.height*0.08);
+                const originY = Math.round(rect.top + rect.height*0.05);
                 confettiBurstFrom(originX, originY, 64);
             },600);
+            
+            // 4. Geschenk wegbewegen & Chat-Modal anzeigen und Chat-Dialog starten
+            setTimeout(()=> {
+                // Geschenk sanft ausblenden und nach unten schieben
+                giftContainer.style.opacity = '0';
+                giftContainer.style.transform = 'translateY(150px) scale(0.9)';
 
-            setTimeout(()=> startQRFlow(), 900);
+                // Chat-Modal einfahren
+                chatModal.classList.remove('hidden');
+                
+                // setze scale-100 und transform: translateY(0)
+                setTimeout(()=> chatBox.style.transform = 'scale(1) translateY(0)', 30);
+                
+                // Starte den interaktiven Chat-Dialog
+                handleChatStage('START');
+            }, 1500); 
+
         }, 700);
     }
 
-    // === QR Flow (verbessert) ===
-    async function startQRFlow(){
-        matched = false;
-        qrModal.style.display = 'flex';
-        qrModal.setAttribute('aria-hidden','false');
-
-        try {
-            const constraints = {
-                audio: false,
-                video: {
-                    facingMode: { ideal: "environment" },
-                    // Mobile bevorzugt native Auflösung/FullScreen; aspectRatio hilft die Kamera zu bevorzugen
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 },
-                    aspectRatio: isMobile ? (window.innerWidth / Math.max(320, window.innerHeight)) : (16/9)
-                }
-                };
-
-            qrStream = await navigator.mediaDevices.getUserMedia(constraints);
-            qrVideo.srcObject = qrStream;
-            await qrVideo.play();
-
-            // Set overlay size to match rendered video size (clientSize)
-            const videoRect = qrVideo.getBoundingClientRect();
-            qrOverlay.width = qrVideo.videoWidth || Math.max(320, Math.round(videoRect.width));
-            qrOverlay.height = qrVideo.videoHeight || Math.max(180, Math.round(videoRect.height));
-            // However overlay canvas css must match displayed size - ensure it covers the video area
-            qrOverlay.style.width = videoRect.width + 'px';
-            qrOverlay.style.height = videoRect.height + 'px';
-
-            // Configure scan canvas (downsampled)
-            const vWidth = qrVideo.videoWidth || qrOverlay.width;
-            const vHeight = qrVideo.videoHeight || qrOverlay.height;
-            const scanW = Math.min(SCAN_WIDTH, vWidth);
-            const scanH = Math.round((scanW / vWidth) * vHeight);
-            scanCanvas.width = scanW;
-            scanCanvas.height = scanH;
-
-            scanning = true;
-            lastScan = 0;
-            requestAnimationFrame(qrTick);
-        } catch (err) {
-            console.error('Kamera konnte nicht gestartet werden:', err);
-            stopQRFlow();
-            alert('Kamerazugriff benötigt, um QR-Codes zu scannen.');
-        }
-    }
-
-    function stopQRFlow(){
-        scanning = false;
-        if(qrStream && qrStream.getTracks){
-            qrStream.getTracks().forEach(t => t.stop());
-        }
-        qrVideo.srcObject = null;
-        qrModal.style.display = 'none';
-        qrModal.setAttribute('aria-hidden','true');
-        // remove any anchored overlay if present
-        const prev = document.getElementById('domOverlay');
-        if(prev) prev.remove();
-    }
-
-    qrClose.addEventListener('click', ()=> stopQRFlow());
-
-    function qrTick(now){
-        if(!scanning) return;
-
-        // throttle scans to SCAN_INTERVAL
-        if(!lastScan) lastScan = now;
-        const elapsed = now - lastScan;
-        if(elapsed < SCAN_INTERVAL){
-            requestAnimationFrame(qrTick);
-            return;
-        }
-        lastScan = now;
-
-        if(qrVideo.readyState !== qrVideo.HAVE_ENOUGH_DATA){
-            requestAnimationFrame(qrTick);
-            return;
-        }
-
-        // Draw downsampled video frame into scanCanvas for jsQR (much faster)
-        const scanW = scanCanvas.width;
-        const scanH = scanCanvas.height;
-        try {
-            scanCtx.drawImage(qrVideo, 0, 0, scanW, scanH);
-        } catch(e){
-            // sometimes drawImage fails early; just retry next frame
-            requestAnimationFrame(qrTick);
-            return;
-        }
-
-        const imageData = scanCtx.getImageData(0, 0, scanW, scanH);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "attemptBoth" });
-
-        // clear overlay (use displayed overlay size: match to video client rect)
-        const videoRect = qrVideo.getBoundingClientRect();
-        overlayCtx.clearRect(0, 0, qrOverlay.width, qrOverlay.height);
-        // adjust overlay canvas coordinate system so that code coords (scaled to video) map to overlay pixels
-        // We'll draw using the scan->video scale factor
-        if(code){
-            // compute scale from scanCanvas -> displayed video
-            const scaleX = videoRect.width / scanW;
-            const scaleY = videoRect.height / scanH;
-
-            // map location points from scan coords to overlay (viewport) coords relative to the video element
-            const tl = { x: code.location.topLeftCorner.x * scaleX, y: code.location.topLeftCorner.y * scaleY };
-            const tr = { x: code.location.topRightCorner.x * scaleX, y: code.location.topRightCorner.y * scaleY };
-            const br = { x: code.location.bottomRightCorner.x * scaleX, y: code.location.bottomRightCorner.y * scaleY };
-            const bl = { x: code.location.bottomLeftCorner.x * scaleX, y: code.location.bottomLeftCorner.y * scaleY };
-
-            // draw polygon on overlay canvas using coordinates relative to the displayed video size
-            // ensure overlay canvas has same backing pixel size as displayed video area (we set qrOverlay.width earlier to video natural width)
-            // But the overlayCtx draw operations use the overlay's internal pixel dimensions; we compensate by mapping to the overlay's width/height proportionally.
-            const overlayClientW = videoRect.width;
-            const overlayClientH = videoRect.height;
-            // If the overlay canvas backing resolution differs from client size, compute final scale:
-            const backingScaleX = qrOverlay.width / overlayClientW;
-            const backingScaleY = qrOverlay.height / overlayClientH;
-
-            function toOverlayPt(p){ return { x: p.x * backingScaleX, y: p.y * backingScaleY }; }
-
-            const otl = toOverlayPt(tl); const otr = toOverlayPt(tr); const obr = toOverlayPt(br); const obl = toOverlayPt(bl);
-
-            overlayCtx.lineWidth = Math.max(2, qrOverlay.width / 220);
-            overlayCtx.strokeStyle = 'rgba(251,191,36,0.95)';
-            overlayCtx.beginPath();
-            overlayCtx.moveTo(otl.x, otl.y);
-            overlayCtx.lineTo(otr.x, otr.y);
-            overlayCtx.lineTo(obr.x, obr.y);
-            overlayCtx.lineTo(obl.x, obl.y);
-            overlayCtx.closePath();
-            overlayCtx.stroke();
-
-            // center point in scan coords
-            const centerScanX = (code.location.topLeftCorner.x + code.location.bottomRightCorner.x) / 2;
-            const centerScanY = (code.location.topLeftCorner.y + code.location.bottomRightCorner.y) / 2;
-            const centerVideoX = centerScanX * scaleX;
-            const centerVideoY = centerScanY * scaleY;
-            const centerOverlayPt = toOverlayPt({ x: centerVideoX, y: centerVideoY });
-
-            // draw centered label on overlay (canvas) - use centered alignment
-            overlayCtx.font = `${Math.max(12, qrOverlay.width/36)}px sans-serif`;
-            overlayCtx.textAlign = 'center';
-            overlayCtx.textBaseline = 'middle';
-            overlayCtx.fillStyle = matched ? 'rgba(16,185,129,0.95)' : 'rgba(255,255,255,0.95)';
-
-            if(!matched && code.data === expectedValue){
-                matched = true;
-                overlayCtx.fillText('Code erkannt — Inhalt: ' + (code.data || ''), centerOverlayPt.x, centerOverlayPt.y - (qrOverlay.width/80));
-                // show lightweight transient DOM overlay positioned properly (updates each frame)
-                const videoClientRect = qrVideo.getBoundingClientRect();
-                const viewportX = Math.round(videoClientRect.left + centerVideoX + window.scrollX);
-                const viewportY = Math.round(videoClientRect.top + centerVideoY + window.scrollY);
-                updateTransientOverlay(viewportX, viewportY, 'Inhalt erkannt gut');
-            } else if(!matched) {
-                overlayCtx.fillText('Code erkannt — Inhalt: ' + (code.data || ''), centerOverlayPt.x, centerOverlayPt.y - (qrOverlay.width/80));
-                // show lightweight transient DOM overlay positioned properly (updates each frame)
-                const videoClientRect = qrVideo.getBoundingClientRect();
-                const viewportX = Math.round(videoClientRect.left + centerVideoX + window.scrollX);
-                const viewportY = Math.round(videoClientRect.top + centerVideoY + window.scrollY);
-                updateTransientOverlay(viewportX, viewportY, 'Inhalt erkannt schlecht');
-            }
-        } else {
-            // optional: clear transient overlay when nothing found
-            removeTransientOverlay();
-        }
-
-        requestAnimationFrame(qrTick);
-    }
-
-    // create/update a transient overlay that follows the detected QR until match or disappears
-    function updateTransientOverlay(viewportX, viewportY, text){
-    let el = document.getElementById('transientOverlay');
-    if(!el){
-        el = document.createElement('div');
-        el.id = 'transientOverlay';
-        el.className = 'qr-anchored-overlay';
-        el.style.whiteSpace = 'nowrap';
-        el.style.zIndex = 200;
-        document.body.appendChild(el);
-    }
-    el.textContent = text;
-    el.style.padding = isMobile ? '8px 12px' : '6px 10px';
-    el.style.fontSize = isMobile ? '14px' : '12px';
-    el.style.left = (viewportX) + 'px';
-    el.style.top  = (viewportY - (isMobile ? 32 : 24)) + 'px';
-    }
-
-    function removeTransientOverlay(){
-        const el = document.getElementById('transientOverlay');
-        if(el) el.remove();
-    }
-
-    // create a persistent overlay anchored to viewport coords
-    function showDomOverlayAtViewport(viewportX, viewportY, message){
-  const prev = document.getElementById('domOverlay');
-  if(prev) prev.remove();
-
-  const el = document.createElement('div');
-  el.id = 'domOverlay';
-  el.className = 'qr-anchored-overlay pulse';
-  el.textContent = message;
-
-  // Touch-friendly sizing
-  el.style.padding = isMobile ? '10px 14px' : '8px 12px';
-  el.style.fontSize = isMobile ? '16px' : '';
-  el.style.pointerEvents = 'auto';
-
-  // Clamp inside viewport with margin
-  const margin = 12;
-  const w = Math.min(window.innerWidth - margin*2, 320);
-  el.style.maxWidth = w + 'px';
-
-  let left = viewportX;
-  let top  = viewportY - 18; // position slightly above center
-
-  // clamp
-  left = Math.max(margin, Math.min(left, window.innerWidth - margin));
-  top  = Math.max(margin, Math.min(top, window.innerHeight - margin));
-
-  el.style.left = left + 'px';
-  el.style.top  = top  + 'px';
-
-  document.body.appendChild(el);
-
-  // persistent: tap once to remove, long-press on mobile also supported
-  el.addEventListener('click', ()=> el.remove());
-  el.addEventListener('touchstart', ()=> { /* allow tap */ }, {passive:true});
-}
-
-
-    // === On load & keyboard ===
+    // === On load & keyboard (unverändert) ===
     window.addEventListener('keydown', (e)=>{
         if(e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
             e.preventDefault();
